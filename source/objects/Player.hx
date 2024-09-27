@@ -43,7 +43,7 @@ class Player extends FlxSprite {
 
 	override function update(elapsed:Float) {
 		updateProperties();
-        if (!PlayState.instance.songEnded)
+        if (!PlayState.instance.mapEnded)
 		    updateMovement(elapsed);
 
 		handleTrails(elapsed);
@@ -125,7 +125,7 @@ class Player extends FlxSprite {
 
 		var nextTile:ArrowTileSpr = null;
 		tile_group.forEachAlive((tile:ArrowTile) -> {
-			if (tile == null || tile.tile.already_hit || tile.tile.missed)
+			if (tile.tile == null || tile.tile.already_hit || tile.tile.missed)
 				return;
 
 			if (nextTile == null)

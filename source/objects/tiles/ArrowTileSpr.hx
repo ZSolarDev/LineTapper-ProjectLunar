@@ -14,7 +14,7 @@ import objects.Player.PlayerDirection;
 	/**
 	 * Value for the tile color data.
 	 */
-	public var tileColorData:TileColorData = Utils.DEFAULT_TILE_COLOR_DATA;
+	public var tileColorData:TileColorData = Common.DEFAULT_TILE_COLOR_DATA;
 
 	/**
 	 * If this tile updates its color each frame.

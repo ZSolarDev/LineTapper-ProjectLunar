@@ -5,7 +5,7 @@ import flixel.effects.FlxFlicker;
 import flixel.util.FlxTimer;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import game.Utils.RGB;
+import game.backend.utils.Common.RGB;
 import objects.Player.PlayerDirection;
 
 /**

@@ -21,7 +21,7 @@ class IntroState extends FlxState {
 
 	override function create():Void
 	{
-        Utils.initialize();
+        Common.initialize();
         haxe.Timer.measure(()->{
             loadIntro();
             animateIntro();

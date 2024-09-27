@@ -1,4 +1,4 @@
-package game;
+package game.backend.utils;
 
 import sys.thread.Thread;
 import objects.tiles.ArrowTile;
@@ -15,7 +15,7 @@ typedef RGB = {
 	var blue:Int;
 }
 
-class Utils {
+class Common {
     /**
      * Default LineTapper Tile Color Data.
      */
@@ -49,6 +49,7 @@ class Utils {
             }
         };
     }
+
     /**
      * Every supported Haxe file extensions (Used for Scripting).
      */
@@ -84,5 +85,32 @@ class Utils {
             display: "CoreCat",
             profile_url: null
         }
+    }
+
+     /**
+     * Get HH:MM:SS formatted time from miliseconds.
+     * @param time The miliseconds to convert.
+     * @return String
+     */
+    public static function formatMS(time:Float):String
+    {
+        var seconds:Int = Math.floor(time / 1000);
+        var secs:String = '' + seconds % 60;
+        var mins:String = "" + Math.floor(seconds / 60)%60;
+        var hour:String = '' + Math.floor((seconds / 3600))%24; 
+        if (seconds < 0)
+            seconds = 0;
+        if (time < 0)
+            time = 0;
+
+        if (secs.length < 2)
+            secs = '0' + secs;
+
+        var res:String = mins + ":" + secs;
+        if (hour != "0"){
+            if (mins.length < 2) mins = "0"+ mins;
+            res = hour+":"+mins + ":" + secs;
+        }
+        return res;
     }
 }
