@@ -11,7 +11,7 @@ import objects.Player.PlayerDirection;
 /**
  * Arrow Tile colors from the map.
  */
- typedef TileColorData = {
+ typedef MapTileColorData = {
 	var zero:RGB;
 	var one:RGB;
 	var two:RGB;

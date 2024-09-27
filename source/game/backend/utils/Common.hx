@@ -19,7 +19,7 @@ class Common {
     /**
      * Default LineTapper Tile Color Data.
      */
-    public static var DEFAULT_TILE_COLOR_DATA(get, null):TileColorData;
+    public static var DEFAULT_TILE_COLOR_DATA(get, null):MapTileColorData;
     static function get_DEFAULT_TILE_COLOR_DATA() {
         return {
             zero: {
