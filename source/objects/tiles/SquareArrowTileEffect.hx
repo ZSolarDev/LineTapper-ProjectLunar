@@ -30,7 +30,7 @@ class SquareArrowTileEffect extends Shape {
 
         //Initialize variables
         step_sec = Conductor.instance.step_ms / 1000;
-        stepDistSecs = step_sec * (this.targetStepDist + 1);
+        stepDistSecs = step_sec * targetStepDist;
     }
 
     public function runHitAnimation()

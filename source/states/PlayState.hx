@@ -1,5 +1,6 @@
 package states;
 
+import objects.tiles.TextTileEffect;
 import flixel.util.typeLimit.OneOfTwo;
 import lime.math.Vector2;
 import flixel.ui.FlxBar;
@@ -39,7 +40,7 @@ class PlayState extends StateBase
     public var misses:Int = 0;
     public var hits:Int = 0;
     public var combo:Int = 0;
-    public var ratings:Map<String, Rating>;
+    public var ratings:Map<TileRating, Rating>;
     
     //Misc variables
 	public var hasEndTransition:Bool = true;
@@ -63,6 +64,7 @@ class PlayState extends StateBase
     // Linemap objects
     public var tile_group:FlxTypedGroup<ArrowTile>;
     public var scripts:ScriptGroup;
+    public var playerTxt:TextTileEffect;
 	public var player:Player;
 
     //Background objects
@@ -100,11 +102,12 @@ class PlayState extends StateBase
 		loadGameplay();
 		loadHUD();
 
-        ratings = new Map<String, Rating>();
+        ratings = new Map<TileRating, Rating>();
         ratings = [
-            'Perfect' => {count: 0, arrowTiles: []},
-            'Cool' => {count: 0, arrowTiles: []},
-            'Meh' => {count: 0, arrowTiles: []}
+            PERFECT => {count: 0, arrowTiles: []},
+            COOL => {count: 0, arrowTiles: []},
+            MEH => {count: 0, arrowTiles: []},
+            MISS => {count: 0, arrowTiles: []},
         ];
         
 		loadSong();
@@ -133,8 +136,8 @@ class PlayState extends StateBase
             targetState = new MenuState();
         tile_group.forEachAlive((tile:ArrowTile) ->
 		{
-            if (tile.tile != null)
-                tile.tile.visible = false;
+            if (tile != null)
+                tile.visible = false;
             if (tile.squareTileEffect != null)
                 tile.squareTileEffect.visible = false;
 		});
@@ -152,6 +155,9 @@ class PlayState extends StateBase
             FlxTween.tween(bg_gradient, {alpha: 0}, 1);
             FlxTween.tween(scoreBoard, {alpha: 0}, 1);
             FlxTween.tween(backdrop, {alpha: 0}, 1);
+            FlxTween.tween(timeBar, {alpha: 0}, 1);
+            FlxTween.tween(timeTextLeft, {alpha: 0}, 1);
+            FlxTween.tween(timeTextRight, {alpha: 0}, 1);
             new FlxTimer().start(1, function(tmr:FlxTimer)
             {
                 FlxFlicker.flicker(player, 0.5, 0.02, true);
@@ -223,7 +229,7 @@ class PlayState extends StateBase
 			var posY = tileData[1] * 50;
 
 			var _theme:MapTheme = linemap.theme;
-			var arrowTile = new ArrowTile(posX, posY, direction, curStep, _theme.tileColorData);
+			var arrowTile = new ArrowTile(posX, posY, direction, curStep, _theme.tileColorData, this);
 			tile_group.add(arrowTile);
 
 			current_direction = direction;
@@ -319,7 +325,9 @@ class PlayState extends StateBase
 		camFollow.x = FlxMath.lerp(player.getMidpoint().x, camFollow.x, 1 - (elapsed * 12));
 		camFollow.y = FlxMath.lerp(player.getMidpoint().y, camFollow.y, 1 - (elapsed * 12));
 
-		if (FlxG.keys.justPressed.SPACE)
+        if (linemap.theme.bgData.bgType == 'VIDEO')
+            gameBG.time = Conductor.instance.time;
+		if (FlxG.keys.justPressed.SPACE && !mapStarted)
 		{
             mapStarted = true;
             #if cpp
@@ -347,7 +355,7 @@ class PlayState extends StateBase
 			{
 				tile_group.forEachAlive((tile:ArrowTile) ->
 				{
-					if (Conductor.instance.current_steps > tile.tile.step - 1 && !tile.tile.already_hit)
+					if (Conductor.instance.current_steps > tile.step - 1 && !tile.hit)
 						onTileHit(tile);
 				});
 			} else {
@@ -355,8 +363,8 @@ class PlayState extends StateBase
 
 				tile_group.forEachAlive((tile:ArrowTile) ->
 				{
-                    if (Conductor.instance.current_steps > tile.tile.step - 1 && !tile.tile.checked){
-                        tile.tile.checked = true;
+                    if (Conductor.instance.current_steps > tile.step - 1 && !tile.checked){
+                        tile.checked = true;
 						updatePlayerPosition(tile);
                     }
 				});
@@ -392,7 +400,8 @@ class PlayState extends StateBase
                             hasCustomBG = false;
                         }
                     #else
-                        gameBG = new Background(bgType, 'assets/data/maps/$mapName/mapAssets/${linemap.theme.bgData.bg}${bgType == IMAGE ? '.png' : bgType == VIDEO ? '.mp4' : '.png'}', linemap.theme.bgData.scaleX, linemap.theme.bgData.scaleY, 0.45);
+                        gameBG = new Background(bgType, 'assets/data/maps/$mapName/mapAssets/${linemap.theme.bgData.bg}${bgType == IMAGE ? '.png' : bgType == VIDEO ? '.mp4' : '.png'}', linemap.theme.bgData.scaleX, linemap.theme.bgData.scaleY, linemap.theme.bgData.alpha);
+                        gameBG.setVideoTime = true;
                         add(gameBG);
                     #end
                 }
@@ -404,6 +413,15 @@ class PlayState extends StateBase
 
 		player = new Player(0, 0);
 		add(player);
+
+        playerTxt = new TextTileEffect(player.x, player.y - 100, 0, '');
+        playerTxt.target = player;
+        playerTxt.yOffset = -50;
+        playerTxt.xOffset = -40;
+        playerTxt.setFormat(Assets.font("extenro-bold"), 15, FlxColor.CYAN, CENTER, OUTLINE, FlxColor.WHITE);
+        playerTxt.borderSize = 0.5;
+        playerTxt.updateHitbox();
+        add(playerTxt);
 	}
 
 
@@ -417,24 +435,50 @@ class PlayState extends StateBase
 		scripts.executeFunc("postUpdate", [elapsed]);
 	}
 
-	public function onTileHit(tile:ArrowTile, ?ratingName:String = 'Perfect')
-        {
-            if (tile != null && tile.squareTileEffect != null){
-                scripts.executeFunc("onTileHit", [tile]);
-                FlxG.sound.play(Assets.sound("hit_sound"), 0.7);
-                tile.onTileHit();
-                tile.already_hit = true;
-                if (using_autoplay)
-                    updatePlayerPosition(tile);
-                combo++;
-                scoreBoard.scale.x += 0.3;
-                FlxG.camera.zoom += 0.05;
-                var rating = ratings.get(ratingName);
-                rating.count++;
-                rating.arrowTiles.push(tile);
-                scripts.executeFunc("postTileHit", [tile]);
-            }
+    public function onTileMiss(tile:ArrowTile)
+    {
+        if (tile != null && tile.squareTileEffect != null){
+            scripts.executeFunc("onTileMiss", [tile]);
+			hitStatus = "Missed!";
+            tile.onTileMiss();
+            scoreBoard.scale.x -= 0.3;
+            misses++;
+            combo = 0;
+            var rating = ratings.get(MISS);
+            rating.count++;
+            rating.arrowTiles.push(tile);
+            scripts.executeFunc("postTileMiss", [tile]);
         }
+    }
+
+    public function flickerTextOnPlayer(text:String, color:FlxColor, length:Float){
+        var splitLength:Float = length/2;
+        playerTxt.visible = true;
+        playerTxt.text = text;
+        playerTxt.color = color;
+        new FlxTimer().start(splitLength, function(t){
+            FlxFlicker.flicker(playerTxt, splitLength, 0.02, false, true);
+        });
+    }
+
+	public function onTileHit(tile:ArrowTile, ?ratingName:TileRating = PERFECT)
+    {
+        if (tile != null && tile.squareTileEffect != null){
+            hitStatus = ArrowTile.tileRatingToString(ratingName);
+            scripts.executeFunc("onTileHit", [tile]);
+            FlxG.sound.play(Assets.sound("hit_sound"), 0.7);
+            tile.onTileHit();
+            if (using_autoplay)
+                updatePlayerPosition(tile);
+            combo++;
+            scoreBoard.scale.x += 0.3;
+            FlxG.camera.zoom += 0.05;
+            var rating = ratings.get(ratingName);
+            rating.count++;
+            rating.arrowTiles.push(tile);
+            scripts.executeFunc("postTileHit", [tile]);
+        }
+    }
 
     public function updatePlayerPosition(tile:ArrowTile){
         player.direction = tile.direction;
@@ -444,5 +488,7 @@ class PlayState extends StateBase
 	public function beatTick() {
 		if (player != null)
 			player.scale.x = player.scale.y += 0.3;
+        if (mapStarted && linemap.theme.bgData.bgType == 'VIDEO' && Conductor.instance.current_beats % 34 == 0)
+            gameBG.updateVideo();
 	}
 }

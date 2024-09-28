@@ -1,5 +1,6 @@
 package objects;
 
+import cpp.Int64;
 import flixel.util.FlxTimer;
 import openfl.display.BitmapData;
 import flixel.group.FlxGroup;
@@ -21,6 +22,8 @@ class Background extends FlxGroup
     public var overlay:FlxSprite;
     public var video:Video;
     public var alpha:Float = 0.45;
+    public var setVideoTime:Bool = false;
+    public var time:Float = 0;
 
     override public function new(type:BackgroundType, asset:String, ?scaleX:Float = 1, ?scaleY:Float = 1, ?alpha:Float = 0.45)
     {
@@ -44,9 +47,11 @@ class Background extends FlxGroup
         return v == VIDEO ? 'VIDEO' : v == IMAGE ? 'IMAGE' : v == NONE ? 'NONE' : 'NONE';
     }
 
-    override public function update(elapsed:Float)
+    public function updateVideo()
     {
-        super.update(elapsed);
+        if (type == VIDEO && setVideoTime && video.bitmap.isPlaying){
+            video.bitmap.time = Std.int(time);
+        }
     }
 
     public function stopVideo()
@@ -66,8 +71,13 @@ class Background extends FlxGroup
         if (type == VIDEO)
         {
             video = new Video();
+            video.alpha = alpha;
             video.antialiasing = true;
             video.scrollFactor.set();
+            video.bitmap.onPlaying.add(function():Void
+            {
+                updateVideo();
+            });
             video.bitmap.onFormatSetup.add(function():Void
             {
                 if (video.bitmap != null && video.bitmap.bitmapData != null)

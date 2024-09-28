@@ -1,11 +1,12 @@
 package objects.tiles;
 
+import states.PlayState;
 import flixel.effects.FlxFlicker;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import game.Conductor;
-import objects.tiles.ArrowTile.TileColorData;
+import objects.tiles.ArrowTile.MapTileColorData;
 import objects.Player.PlayerDirection;
 
 /**
@@ -18,6 +19,7 @@ import objects.Player.PlayerDirection;
 	var three:RGB;
 	var fallback:RGB;
 }
+
 enum abstract TileRating(String) from String to String {
 	var PERFECT = "perfect";
 	var COOL = "good";
@@ -26,16 +28,17 @@ enum abstract TileRating(String) from String to String {
 }
 
 /**
- * Arrow Tile object, a component of the ArrowTile group.
+ * Arrow Tile object, a component of the ArrowTile playstate.
  */
  class ArrowTile extends FlxSprite {
     public var verticalTextOffset:Int = 15;
     public var squareTileEffect:SquareArrowTileEffect;
     public var drawables:Map<String, FlxObject>;
+    public var playstate:PlayState;
 	/**
 	 * Value for the tile color data.
 	 */
-	public var tileColorData:TileColorData = Common.DEFAULT_TILE_COLOR_DATA;
+	public var tileColorData:MapTileColorData = Common.DEFAULT_TILE_COLOR_DATA;
 
 	/**
 	 * If this tile updates its color each frame.
@@ -60,7 +63,7 @@ enum abstract TileRating(String) from String to String {
 	/**
 	 * Indicates whether this tile have been hit.
 	 */
-	public var already_hit:Bool = false;
+	public var hit:Bool = false;
 
 	/**
 	 * Indicates whether the player missed this tile.
@@ -75,11 +78,12 @@ enum abstract TileRating(String) from String to String {
 	 * @param curStep This tile's Step time.
 	 * @param tileColorData Color Data for this ArrowTile.
 	 */
-	public function new(nX:Float, nY:Float, dir:PlayerDirection, curStep:Int, ?tileColorData:TileColorData) {
+	public function new(nX:Float, nY:Float, dir:PlayerDirection, curStep:Int, ?tileColorData:MapTileColorData, playstate:PlayState) {
 		super(nX, nY);
 		step = curStep;
 		direction = dir;
         antialiasing = true;
+        this.playstate = playstate;
 		if (tileColorData != null)
 			this.tileColorData = tileColorData;
 
@@ -102,13 +106,12 @@ enum abstract TileRating(String) from String to String {
 
         drawables = new Map<String, FlxObject>();
         squareTileEffect = new SquareArrowTileEffect(nX, nY, this, 5);
-        drawables.set('squareTileEffect', squareTileEffect);
+        this.playstate.add(squareTileEffect);
 	}
 
-    override public function draw() {
-        super.draw();
-        for (drawable in drawables)
-            drawable.draw();
+    public static function tileRatingToString(rating:TileRating):String
+    {
+        return rating == 'perfect' ? 'Perfect!' : rating == 'cool' ? 'Cool!' : rating == 'meh' ? 'Meh.' : rating == 'miss' ? 'Missed!' : 'Perfect!';
     }
 
     function updateColors()
@@ -122,55 +125,33 @@ enum abstract TileRating(String) from String to String {
 		}
     }
 
-    public function onTileHit(?rating:String = 'PERFECT')
+    public function onTileHit(?rating:TileRating = PERFECT)
     {
+        hit = true;
         // Tween based on properties instead of a set value. Just a way to make sure custom things like modcharts won't break.
         FlxTween.tween(this, {"scale.x": scale.x + scale.x/2.5, "scale.y": scale.y + scale.y/2.5, angle: angle + 70, alpha: 0}, 0.5, {ease: FlxEase.quadOut});
         FlxTween.tween(squareTileEffect, {"scale.x": scale.x + 1.7, "scale.y": scale.y + 1.7, alpha: 0}, 0.5, {ease: FlxEase.quadOut});
         new FlxTimer().start(0.5, function(t){
-            drawables.remove('squareTileEffect');
+            playstate.remove(squareTileEffect);
             if (squareTileEffect != null)
                 squareTileEffect.kill();
             squareTileEffect = null;
         });
-        var rTxt = new FlxText(x, y + verticalTextOffset, 0, rating);
-        rTxt.setFormat(Assets.font("extenro-bold"), 10, FlxColor.CYAN, CENTER, OUTLINE, FlxColor.WHITE);
-        rTxt.borderSize = 0.5;
-        rTxt.updateHitbox();
-        drawables.set('rTxt', rTxt);
-        new FlxTimer().start(0.25, function(t){
-            FlxFlicker.flicker(rTxt, 0.25, 0.02, false, true, function(e){
-                drawables.remove('rTxt');
-                if (rTxt != null)
-                    rTxt.kill();
-                rTxt = null;
-            });
-        });
+        playstate.flickerTextOnPlayer(tileRatingToString(rating), FlxColor.CYAN, 0.35);
     }
 
     public function onTileMiss()
     {
+        missed = true;
         FlxTween.tween(this, {"scale.x": scale.x - scale.x/2.5, "scale.y": scale.y - scale.y/2.5, angle: angle - 10, alpha: 0}, 0.5, {ease: FlxEase.quadIn});
         FlxTween.tween(squareTileEffect, {"scale.x": scale.x - scale.x/2.5, "scale.y": scale.y - scale.y/2.5, angle: -10, alpha: 0}, 0.5, {ease: FlxEase.quadIn});
         new FlxTimer().start(0.5, function(t){
-            drawables.remove('squareTileEffect');
+            playstate.remove(squareTileEffect);
             if (squareTileEffect != null)
                 squareTileEffect.kill();
             squareTileEffect = null;
         });
-        var mTxt = new FlxText(x, y + verticalTextOffset, 0, 'MISS');
-        mTxt.setFormat(Assets.font("extenro-bold"), 10, 0xFFAA0000, CENTER, OUTLINE, FlxColor.WHITE);
-        mTxt.borderSize = 0.5;
-        mTxt.updateHitbox();
-        drawables.set('mTxt', mTxt);
-        new FlxTimer().start(0.25, function(t){
-            FlxFlicker.flicker(mTxt, 0.25, 0.02, false, true, function(e){
-                drawables.remove('mTxt');
-                if (mTxt != null)
-                    mTxt.kill();
-                mTxt = null;
-            });
-        });
+        playstate.flickerTextOnPlayer(tileRatingToString(MISS), 0xFFAA0000, 0.35);
     }
 
 	override function update(elapsed:Float) {

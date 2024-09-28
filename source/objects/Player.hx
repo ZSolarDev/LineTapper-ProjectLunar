@@ -124,7 +124,7 @@ class Player extends FlxSprite {
 
 		var nextTile:ArrowTile = null;
 		tile_group.forEachAlive((tile:ArrowTile) -> {
-			if (tile == null || tile.already_hit || tile.missed)
+			if (tile == null || tile.hit || tile.missed)
 				return;
 
 			if (nextTile == null)
@@ -146,16 +146,11 @@ class Player extends FlxSprite {
 			var tOffset:Float = timeDiff * (BOX_SIZE / Conductor.instance.step_ms) * states.PlayState.instance.speedRate;
 
 			if (hitable) {
-				if (pressArray[cast nextTile.direction] && !nextTile.already_hit) {
-					PlayState.instance.hitStatus = "PERFECT!!";
+				if (pressArray[cast nextTile.direction] && !nextTile.hit) {
 					PlayState.instance.onTileHit(nextTile);
 				}
 			} else if (!nextTile.missed && tileTime < Conductor.instance.time - (Conductor.instance.safe_zone_offset * 0.4)) {
-                PlayState.instance.misses++;
-				PlayState.instance.hitStatus = "MISSED!";
-				PlayState.instance.combo = 0;
-                nextTile.onTileMiss();
-				nextTile.missed = true;
+				PlayState.instance.onTileMiss(nextTile);
 			}
 		}
 	}
