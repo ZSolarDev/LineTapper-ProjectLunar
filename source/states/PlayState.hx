@@ -1,5 +1,6 @@
 package states;
 
+import lime.app.Application;
 import objects.tiles.TextTileEffect;
 import flixel.util.typeLimit.OneOfTwo;
 import lime.math.Vector2;
@@ -109,7 +110,7 @@ class PlayState extends StateBase
             MEH => {count: 0, arrowTiles: []},
             MISS => {count: 0, arrowTiles: []},
         ];
-        
+
 		loadSong();
 		camFollow = new FlxObject(player.x, player.y - 100, 1, 1);
 		add(camFollow);
@@ -325,8 +326,10 @@ class PlayState extends StateBase
 		camFollow.x = FlxMath.lerp(player.getMidpoint().x, camFollow.x, 1 - (elapsed * 12));
 		camFollow.y = FlxMath.lerp(player.getMidpoint().y, camFollow.y, 1 - (elapsed * 12));
 
+        #if cpp
         if (linemap.theme.bgData.bgType == 'VIDEO')
             gameBG.time = Conductor.instance.time;
+        #end
 		if (FlxG.keys.justPressed.SPACE && !mapStarted)
 		{
             mapStarted = true;

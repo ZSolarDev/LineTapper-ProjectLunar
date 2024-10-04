@@ -31,7 +31,7 @@
 
 	<set name="BUILD_DIR" value="export" />
 	<source path="source" />
-	<assets path="assets" />
+	<assets path="assets"/>
 
 	<!-- _____________________________ Game Settings ____________________________ -->
 	<!-- You can change these settings to whatever you wanted.-->
@@ -43,15 +43,12 @@
 
 	<haxelib name="flixel" />
 	<haxelib name="hscript" if="USING_SCRIPTS"/>
-    <haxelib name="hxvlc" if="cpp"/>
+    <haxelib name="hxvlc"/>
 
 	<!--In case you want to use the addons package-->
 	<haxelib name="flixel-addons" />
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
-
-	<!--Remove the legacy health system-->
-	<haxedef name="FLX_NO_HEALTH" />
 	
 	<!--Enable the Flixel core recording system-->
 	<!--<haxedef name="FLX_RECORD" />-->
@@ -90,5 +87,5 @@
 	<!-- _________________________________ Custom _______________________________ -->
 
 	<!--Place custom nodes like icons here-->
-	<icon path="resource/icon_hd-pl.png" />
+	<icon path="resource/icon_hd-pl.png"/>
 </project>
