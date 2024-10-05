@@ -199,7 +199,7 @@ class PlayState extends StateBase
 
 	public function loadSong()
 	{
-		var current_direction:PlayerDirection = PlayerDirection.DOWN;
+		var current_direction:Direction = Direction.DOWN;
 		var tileData:Array<Int> = [0, 0]; // Current Tile, rounded from 50px, 0,0 is the first tile.
 		var curStep:Int = 0;
 
@@ -209,17 +209,17 @@ class PlayState extends StateBase
 			var stepDifference:Int = tile.step - curStep;
 			curStep = tile.step; // Update curStep to the instance tile step
 
-			var direction:PlayerDirection = cast tile.direction;
+			var direction:Direction = cast tile.direction;
 
 			switch (current_direction)
 			{
-				case PlayerDirection.LEFT:
+				case Direction.LEFT:
 					tileData[0] -= stepDifference;
-				case PlayerDirection.RIGHT:
+				case Direction.RIGHT:
 					tileData[0] += stepDifference;
-				case PlayerDirection.UP:
+				case Direction.UP:
 					tileData[1] -= stepDifference;
-				case PlayerDirection.DOWN:
+				case Direction.DOWN:
 					tileData[1] += stepDifference;
 				default:
 					trace("Invalid direction type in step " + tile.step);
@@ -485,10 +485,11 @@ class PlayState extends StateBase
 
     public function updatePlayerPosition(tile:ArrowTile){
         player.direction = tile.direction;
-		player.setPosition(tile.x, tile.y);
+		player.targetX = tile.x;
+        player.targetY = tile.y;
     }
 
-	public function beatTick() {
+	public function beatTick(beat:Int) {
 		if (player != null)
 			player.scale.x = player.scale.y += 0.3;
         if (mapStarted && linemap.theme.bgData.bgType == 'VIDEO' && Conductor.instance.current_beats % 34 == 0)
