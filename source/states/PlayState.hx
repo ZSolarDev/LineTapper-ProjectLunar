@@ -7,7 +7,7 @@ import lime.math.Vector2;
 import flixel.ui.FlxBar;
 import objects.Background;
 import game.backend.Lyrics;
-
+import flixel.effects.FlxFlicker;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import game.backend.script.ScriptGroup;
@@ -29,9 +29,6 @@ typedef Rating = {
     var arrowTiles:Array<ArrowTile>;
 }
 
-/**
- * Main gameplay state of LineTapper.
- */
 class PlayState extends StateBase
 {
     //Instance of this playstate
@@ -51,15 +48,7 @@ class PlayState extends StateBase
 
     //Hud objects
 	public var scoreBoard:FlxText;
-
-	/**
-	 * Lyrics data of this song.
-	 */
 	public var lyrics:Lyrics;
-	
-	/**
-	 * Lyrics text object of this song.
-	 */
 	public var lyricText:FlxText;
     public var timeBar:FlxBar;
 	public var timeTextLeft:FlxText;
@@ -88,10 +77,6 @@ class PlayState extends StateBase
 
     // Camera stuff
 	public var gameCamera:FlxCamera;
-	
-	/**
-	 * The HUD Camera.
-	 */
 	public var hudCamera:FlxCamera;
 	public var camFollow:FlxObject;
 
@@ -123,7 +108,7 @@ class PlayState extends StateBase
             PERFECT => {count: 0, arrowTiles: []},
             COOL => {count: 0, arrowTiles: []},
             MEH => {count: 0, arrowTiles: []},
-			MISS => {count: 0, arrowTiles: []}
+            MISS => {count: 0, arrowTiles: []},
         ];
 
 		loadSong();
@@ -220,6 +205,7 @@ class PlayState extends StateBase
 
 		for (tile in linemap.tiles)
 		{
+			// Calculate step difference
 			var stepDifference:Int = tile.step - curStep;
 			curStep = tile.step; // Update curStep to the instance tile step
 
@@ -239,6 +225,7 @@ class PlayState extends StateBase
 					trace("Invalid direction type in step " + tile.step);
 			}
 
+			// Debugging to ensure we are creating ArrowTiles
 			var posX = tileData[0] * 50;
 			var posY = tileData[1] * 50;
 
@@ -255,10 +242,7 @@ class PlayState extends StateBase
 		// trace("Tile group length: " + tile_group.length);
 	}
 
-	/**
-	 * Initializes the camera objects
-	 */
-	function initCameras()
+	public function initCameras()
 	{
 		gameCamera = new FlxCamera();
 		FlxG.cameras.reset(gameCamera);
