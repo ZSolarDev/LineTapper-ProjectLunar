@@ -485,7 +485,8 @@ class PlayState extends StateBase
 
     public function updatePlayerPosition(tile:ArrowTile){
         player.direction = tile.direction;
-		player.setPosition(tile.x, tile.y);
+		player.targetX = tile.x;
+        player.targetY = tile.y;
     }
 
 	public function beatTick(beat:Int) {

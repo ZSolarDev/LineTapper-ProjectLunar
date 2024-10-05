@@ -33,7 +33,6 @@ enum abstract TileRating(String) from String to String {
  class ArrowTile extends FlxSprite {
     public var verticalTextOffset:Int = 15;
     public var squareTileEffect:SquareArrowTileEffect;
-    public var drawables:Map<String, FlxObject>;
     public var playstate:PlayState;
 	/**
 	 * Value for the tile color data.
@@ -46,7 +45,7 @@ enum abstract TileRating(String) from String to String {
 	public var canUpdateColors:Bool = true;
 
 	/**
-	 * Arrow direction of this tile points at. (`PlayerDirection`)
+	 * Arrow direction of this tile points at. (`Direction`)
 	 */
 	public var direction:Direction = DOWN;
 
@@ -109,7 +108,6 @@ enum abstract TileRating(String) from String to String {
 		}
 		alpha = 0;
 
-        drawables = new Map<String, FlxObject>();
         squareTileEffect = new SquareArrowTileEffect(nX, nY, this, 5);
         this.playstate.add(squareTileEffect);
 	}

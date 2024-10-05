@@ -66,7 +66,7 @@ class MenuState extends StateBase {
 
 		generateOptions();
 
-		logo = new FlxSprite().loadGraphic(Assets.image("menu/logo"));
+		logo = new FlxSprite().loadGraphic(Assets.image("menu/logo-pl"));
 		logo.screenCenter(X);
 		logo.y = 30;
 		logo.scale.set(0.6, 0.6);
@@ -74,7 +74,7 @@ class MenuState extends StateBase {
 		add(logo);
 		
 		user_profile = new Profile(0,FlxG.height-(Profile.size.height+20));
-		user_profile.x -= user_profile.nWidth + 150;
+		user_profile.x -= user_profile.nWidth + 250;
 		add(user_profile);
 
 		var scaleXTarget:Float = (FlxG.width * 0.75) / boxBelow.width;
