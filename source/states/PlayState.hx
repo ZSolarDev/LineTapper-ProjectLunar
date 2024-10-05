@@ -7,7 +7,7 @@ import lime.math.Vector2;
 import flixel.ui.FlxBar;
 import objects.Background;
 import game.backend.Lyrics;
-import flixel.effects.FlxFlicker;
+
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import game.backend.script.ScriptGroup;
@@ -29,6 +29,9 @@ typedef Rating = {
     var arrowTiles:Array<ArrowTile>;
 }
 
+/**
+ * Main gameplay state of LineTapper.
+ */
 class PlayState extends StateBase
 {
     //Instance of this playstate
@@ -48,7 +51,15 @@ class PlayState extends StateBase
 
     //Hud objects
 	public var scoreBoard:FlxText;
+
+	/**
+	 * Lyrics data of this song.
+	 */
 	public var lyrics:Lyrics;
+	
+	/**
+	 * Lyrics text object of this song.
+	 */
 	public var lyricText:FlxText;
     public var timeBar:FlxBar;
 	public var timeTextLeft:FlxText;
@@ -77,6 +88,10 @@ class PlayState extends StateBase
 
     // Camera stuff
 	public var gameCamera:FlxCamera;
+	
+	/**
+	 * The HUD Camera.
+	 */
 	public var hudCamera:FlxCamera;
 	public var camFollow:FlxObject;
 
@@ -108,7 +123,7 @@ class PlayState extends StateBase
             PERFECT => {count: 0, arrowTiles: []},
             COOL => {count: 0, arrowTiles: []},
             MEH => {count: 0, arrowTiles: []},
-            MISS => {count: 0, arrowTiles: []},
+			MISS => {count: 0, arrowTiles: []}
         ];
 
 		loadSong();
@@ -199,33 +214,31 @@ class PlayState extends StateBase
 
 	public function loadSong()
 	{
-		var current_direction:PlayerDirection = PlayerDirection.DOWN;
+		var current_direction:Direction = Direction.DOWN;
 		var tileData:Array<Int> = [0, 0]; // Current Tile, rounded from 50px, 0,0 is the first tile.
 		var curStep:Int = 0;
 
 		for (tile in linemap.tiles)
 		{
-			// Calculate step difference
 			var stepDifference:Int = tile.step - curStep;
 			curStep = tile.step; // Update curStep to the instance tile step
 
-			var direction:PlayerDirection = cast tile.direction;
+			var direction:Direction = cast tile.direction;
 
 			switch (current_direction)
 			{
-				case PlayerDirection.LEFT:
+				case Direction.LEFT:
 					tileData[0] -= stepDifference;
-				case PlayerDirection.RIGHT:
+				case Direction.RIGHT:
 					tileData[0] += stepDifference;
-				case PlayerDirection.UP:
+				case Direction.UP:
 					tileData[1] -= stepDifference;
-				case PlayerDirection.DOWN:
+				case Direction.DOWN:
 					tileData[1] += stepDifference;
 				default:
 					trace("Invalid direction type in step " + tile.step);
 			}
 
-			// Debugging to ensure we are creating ArrowTiles
 			var posX = tileData[0] * 50;
 			var posY = tileData[1] * 50;
 
@@ -242,7 +255,10 @@ class PlayState extends StateBase
 		// trace("Tile group length: " + tile_group.length);
 	}
 
-	public function initCameras()
+	/**
+	 * Initializes the camera objects
+	 */
+	function initCameras()
 	{
 		gameCamera = new FlxCamera();
 		FlxG.cameras.reset(gameCamera);
@@ -488,7 +504,7 @@ class PlayState extends StateBase
 		player.setPosition(tile.x, tile.y);
     }
 
-	public function beatTick() {
+	public function beatTick(beat:Int) {
 		if (player != null)
 			player.scale.x = player.scale.y += 0.3;
         if (mapStarted && linemap.theme.bgData.bgType == 'VIDEO' && Conductor.instance.current_beats % 34 == 0)

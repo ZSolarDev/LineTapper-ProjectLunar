@@ -7,7 +7,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import game.Conductor;
 import objects.tiles.ArrowTile.MapTileColorData;
-import objects.Player.PlayerDirection;
+import objects.Player.Direction;
 
 /**
  * Arrow Tile colors from the map.
@@ -48,7 +48,7 @@ enum abstract TileRating(String) from String to String {
 	/**
 	 * Arrow direction of this tile points at. (`PlayerDirection`)
 	 */
-	public var direction:PlayerDirection = DOWN;
+	public var direction:Direction = DOWN;
 
 	/**
 	 * Variable to assist with miss handling.
@@ -70,6 +70,11 @@ enum abstract TileRating(String) from String to String {
 	 */
 	public var missed:Bool = false;
 
+    /**
+	 * Rating of this tile after gets hit.
+	 */
+	public var rating:TileRating = MISS;
+
 	/**
 	 * Creates a new ArrowTile object.
 	 * @param nX X Position
@@ -78,7 +83,7 @@ enum abstract TileRating(String) from String to String {
 	 * @param curStep This tile's Step time.
 	 * @param tileColorData Color Data for this ArrowTile.
 	 */
-	public function new(nX:Float, nY:Float, dir:PlayerDirection, curStep:Int, ?tileColorData:MapTileColorData, playstate:PlayState) {
+	public function new(nX:Float, nY:Float, dir:Direction, curStep:Int, ?tileColorData:MapTileColorData, playstate:PlayState) {
 		super(nX, nY);
 		step = curStep;
 		direction = dir;
