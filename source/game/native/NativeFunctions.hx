@@ -1,15 +1,16 @@
 package game.native;
 
-#if cpp
-import cpp.Int32;
-#end
-
 /**
  * Native Windows Functions.
  * You aren't supposed to use this directly.
  * To use the functions, use NativeUtil.
+ * I'm also working on HashLink support for this class.
  * - ZSolarDev :|
  */
+
+#if cpp
+import cpp.Int32;
+#end
 
 #if cpp
 @:buildXml('

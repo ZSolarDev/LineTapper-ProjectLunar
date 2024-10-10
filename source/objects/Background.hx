@@ -1,10 +1,11 @@
 package objects;
 
-import cpp.Int64;
 import flixel.util.FlxTimer;
 import openfl.display.BitmapData;
 import flixel.group.FlxGroup;
+#if cpp
 import hxvlc.flixel.FlxVideoSprite as Video;
+#end
 
 enum BackgroundType {
     VIDEO;
@@ -20,7 +21,9 @@ class Background extends FlxGroup
     public var scaleY:Float;
     public var image:FlxSprite;
     public var overlay:FlxSprite;
+    #if cpp
     public var video:Video;
+    #end
     public var alpha:Float = 0.45;
     public var setVideoTime:Bool = false;
     public var time:Float = 0;
@@ -49,27 +52,45 @@ class Background extends FlxGroup
 
     public function updateVideo()
     {
-        if (type == VIDEO && setVideoTime && video.bitmap.isPlaying){
-            video.bitmap.time = Std.int(time);
+        #if cpp
+        if (video != null){
+            if (type == VIDEO && setVideoTime && video.bitmap.isPlaying){
+                video.bitmap.time = Std.int(time);
+            }
         }
+        #else
+        trace('This is not a cpp build!');
+        #end
     }
 
     public function stopVideo()
     {
-        remove(video);
-        video.stop();
-        video.visible = false;
+        #if cpp
+        if (video != null){
+            remove(video);
+            video.stop();
+            video.visible = false;
+        }
+        #else
+            trace('This is not a cpp build!');
+        #end
     }
     
     public function playVideo()
     {
-        video.play();
+        #if cpp
+        if (video != null)
+            video.play();
+        #else
+        trace('This is not a cpp build!');
+        #end
     }
 
     public function loadAssets()
     {
         if (type == VIDEO)
         {
+            #if cpp
             video = new Video();
             video.alpha = alpha;
             video.antialiasing = true;
@@ -89,6 +110,9 @@ class Background extends FlxGroup
             });
             video.load(asset, [':no-audio']);
             add(video);
+            #else
+            trace('This is not a cpp build!');
+            #end
         }
         if (type == IMAGE)
         {

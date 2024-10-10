@@ -1,6 +1,6 @@
 package objects;
 
-import game.native.NativeUtil;
+import game.backend.utils.NativeUtil;
 import flixel.FlxG;
 import flixel.math.FlxMath;
 import haxe.Timer;
