@@ -49,9 +49,30 @@ class Common {
             }
         };
     }
+    /**
+     * Converts a Boolean to an Integer.
+     * 
+     * Default return: 0 = false, 1 = true.
+     * 
+     * Flipped return: 1 = false, 0 = true.
+     * 
+     * @param v The bool that is converted.
+     * @param f If the return value will be flipped.
+     * @return Int
+     */
+    public static function intFromBool(v:Bool, f:Bool):Int
+        return v ? f ? 0 : 1 : f ? 1 : 0;
 
     /**
-     * Every supported Haxe file extensions (Used for Scripting).
+     * Converts an Integer to a Floating Point Value.
+     * @param v The int that is converted.
+     * @return Float
+     */
+    public static function float(v:Int):Float
+        return Std.parseFloat(Std.string(v));
+
+    /**
+     * Every supported Haxe file extensions (Used for Scripting.)
      */
     public static var HAXE_EXT:Array<String> = ["hx","hxs","hscript"];
     public static function checkHXS(filename:String) {
@@ -106,11 +127,11 @@ class Common {
         if (secs.length < 2)
             secs = '0' + secs;
 
-        var shit:String = mins + ":" + secs;
+        var res:String = mins + ":" + secs;
         if (hour != "0"){
             if (mins.length < 2) mins = "0"+ mins;
-            shit = hour+":"+mins + ":" + secs;
+            res = hour+":"+mins + ":" + secs;
         }
-        return shit;
+        return res;
     }
 }

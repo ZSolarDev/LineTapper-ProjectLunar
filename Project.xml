@@ -42,7 +42,7 @@
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
-    <haxelib name="kumoui" />
+    <haxelib name="hlwnative" if="hl"/>
 	<haxelib name="hscript" if="USING_SCRIPTS"/>
     <haxelib name="hxvlc" if="cpp"/>
 

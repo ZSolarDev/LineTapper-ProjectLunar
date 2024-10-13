@@ -492,7 +492,9 @@ class PlayState extends StateBase
 	public function beatTick(beat:Int) {
 		if (player != null)
 			player.scale.x = player.scale.y += 0.3;
+        #if cpp
         if (mapStarted && linemap.theme.bgData.bgType == 'VIDEO' && Conductor.instance.current_beats % 34 == 0)
             gameBG.updateVideo();
+        #end
 	}
 }
