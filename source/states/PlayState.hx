@@ -368,7 +368,7 @@ class PlayState extends StateBase
 				{
                     if (Conductor.instance.current_steps > tile.step - 1 && !tile.checked){
                         tile.checked = true;
-						updatePlayerPosition(tile);
+						//updatePlayerPosition(tile);
                     }
 				});
 			}
