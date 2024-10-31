@@ -3,9 +3,7 @@ package objects;
 import flixel.util.FlxTimer;
 import openfl.display.BitmapData;
 import flixel.group.FlxGroup;
-#if cpp
-import hxvlc.flixel.FlxVideoSprite as Video;
-#end
+import game.backend.Video;
 
 enum BackgroundType {
     VIDEO;
@@ -54,8 +52,8 @@ class Background extends FlxGroup
     {
         #if cpp
         if (video != null){
-            if (type == VIDEO && setVideoTime && video.bitmap.isPlaying){
-                video.bitmap.time = Std.int(time);
+            if (type == VIDEO && setVideoTime && video.isPlaying){
+                video.time = Std.int(time);
             }
         }
         #else
@@ -79,8 +77,10 @@ class Background extends FlxGroup
     public function playVideo()
     {
         #if cpp
-        if (video != null)
+        if (video != null){
             video.play();
+            updateVideo();
+        }
         #else
         trace('This is not a cpp build!');
         #end
@@ -95,20 +95,21 @@ class Background extends FlxGroup
             video.alpha = alpha;
             video.antialiasing = true;
             video.scrollFactor.set();
-            video.bitmap.onPlaying.add(function():Void
+            video.onStart.add(function():Void
             {
                 updateVideo();
             });
-            video.bitmap.onFormatSetup.add(function():Void
+            video.onInit.add(function():Void
             {
-                if (video.bitmap != null && video.bitmap.bitmapData != null)
-                {
+                #if cpp
+                if (video.bitmap != null)
+                { #end
                     video.setGraphicSize(1280, 720);
                     video.updateHitbox();
                     video.screenCenter();
-                }
+                #if cpp } #end
             });
-            video.load(asset, [':no-audio']);
+            video.loadVideoAsset(asset, false);
             add(video);
             #else
             trace('This is not a cpp build!');

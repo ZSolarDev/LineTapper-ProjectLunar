@@ -493,8 +493,10 @@ class PlayState extends StateBase
 		if (player != null)
 			player.scale.x = player.scale.y += 0.3;
         #if cpp
-        if (mapStarted && linemap.theme.bgData.bgType == 'VIDEO' && Conductor.instance.current_beats % 34 == 0)
-            gameBG.updateVideo();
+        if (mapStarted && linemap.theme.bgData.bgType == 'VIDEO'){
+            if (Conductor.instance.current_beats % 34 == 0 || Conductor.instance.current_beats == 1 || Conductor.instance.current_beats == 2)
+                gameBG.updateVideo();
+        }
         #end
 	}
 }
