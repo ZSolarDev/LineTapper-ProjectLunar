@@ -84,6 +84,13 @@ class Player extends FlxSprite {
 
 		handleTrails(elapsed);
 		updateScale(elapsed);
+        updatePositionFromTargets();
+		super.update(elapsed);
+	}
+
+    // TODO: Use elapsed to make it un-frame rate dependent.
+    function updatePositionFromTargets()
+    {
         if (oldInterpPosition != null){
             if (interpPosition != oldInterpPosition)
             {
@@ -96,8 +103,7 @@ class Player extends FlxSprite {
             y = FlxMath.lerp(y, targetY, 0.2);
         }
         oldInterpPosition = interpPosition;
-		super.update(elapsed);
-	}
+    }
 
 	function updateProperties() {
 		if (Conductor.instance != null)
