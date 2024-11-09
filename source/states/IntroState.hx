@@ -126,7 +126,7 @@ class IntroState extends FlxState {
         Thread.create(() -> {
             var img:URLLoader;
             try{
-                img = new URLLoader(new URLRequest(Common.PLAYER.profile_url));
+                img = new URLLoader();
                 img.dataFormat = BINARY;
                 img.addEventListener(Event.COMPLETE, (e:Event) -> {
                     Common.PLAYER_PFP_DATA = img.data;
@@ -135,6 +135,8 @@ class IntroState extends FlxState {
                     trace("Error loading profile image: " + e.text);
                     // Handle the error (e.g., fallback, retry, notify the user, etc.)
                 });
+                
+                img.load(new URLRequest(Common.PLAYER.profile_url));
             } catch (e) {
                 trace("Error loading profile image: " + e.message);
             }
