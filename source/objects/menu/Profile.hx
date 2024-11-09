@@ -1,5 +1,6 @@
 package objects.menu;
 
+import sys.thread.Thread;
 import openfl.events.IOErrorEvent;
 import flixel.util.FlxSpriteUtil;
 import haxe.Timer;
@@ -44,44 +45,34 @@ class Profile extends FlxSprite {
 
     public function new(nX:Float = 0, nY:Float = 0) {
         super(nX,nY);
-
         // Loads the profile image
         trace("Preparing");
-        var img:URLLoader = new URLLoader(new URLRequest(Common.PLAYER.profile_url));
-        img.dataFormat = BINARY;
-        img.addEventListener(Event.COMPLETE, (e:Event) -> {
-            var temp:FlxSprite = new FlxSprite().loadGraphic(BitmapData.fromBytes(img.data));
-            var circ:FlxSprite = new FlxSprite().makeGraphic(Std.int(temp.width),Std.int(temp.height),FlxColor.TRANSPARENT);
-            FlxSpriteUtil.drawCircle(circ,-1,-1,-1,FlxColor.BLACK);
-            FlxSpriteUtil.alphaMask(this,temp.pixels,circ.pixels);
-            setGraphicSize(size.width,size.height);
-            updateHitbox();
+        var img:URLLoader;
+        
+        var temp:FlxSprite = new FlxSprite().loadGraphic(Common.PLAYER_PFP_DATA != null ? BitmapData.fromBytes(Common.PLAYER_PFP_DATA) : '');
+        var circ:FlxSprite = new FlxSprite().makeGraphic(Std.int(temp.width),Std.int(temp.height),FlxColor.TRANSPARENT);
+        FlxSpriteUtil.drawCircle(circ,-1,-1,-1,FlxColor.BLACK);
+        FlxSpriteUtil.alphaMask(this,temp.pixels,circ.pixels);
 
-            _txt_displayName = new FlxText(0,0,-1,Common.PLAYER.display,30);
-            _txt_displayName.setFormat(Assets.font("extenro-bold"), 14, FlxColor.WHITE);
-            _txt_indicator = new FlxText(0,0,-1,"OFFLINE",30);
-            _txt_indicator.setFormat(Assets.font("extenro-bold"), 8, FlxColor.GRAY);
-            ready = true;
-        });
-        img.addEventListener(IOErrorEvent.IO_ERROR, (e:IOErrorEvent) -> {
-            trace("Error loading image: " + e.text);
+        setGraphicSize(size.width,size.height);
+        updateHitbox();
 
-            setGraphicSize(size.width,size.height);
-            updateHitbox();
-
-            _txt_displayName = new FlxText(0,0,-1,Common.PLAYER.display,30);
-            _txt_displayName.setFormat(Assets.font("extenro-bold"), 14, FlxColor.WHITE);
-            _txt_indicator = new FlxText(0,0,-1,"OFFLINE",30);
-            _txt_indicator.setFormat(Assets.font("extenro-bold"), 8, FlxColor.GRAY);
-            ready = true;
-            // Handle the error (e.g., fallback, retry, notify the user, etc.)
-        });
-        img.load(new URLRequest(Common.PLAYER.profile_url));
-
+        _txt_displayName = new FlxText(0,0,-1,Common.PLAYER.display,30);
+        _txt_displayName.setFormat(Assets.font("extenro-bold"), 14, FlxColor.WHITE);
+        _txt_indicator = new FlxText(0,0,-1,"OFFLINE",30);
+        _txt_indicator.setFormat(Assets.font("extenro-bold"), 8, FlxColor.GRAY);
         _parent_effect = new FlxSkewedSprite();
         _parent_effect = cast _parent_effect.makeGraphic(15,size.height);
         _parent_effect.antialiasing = true;
         _parent_effect.skew.x = -30;
+
+        ready = true;
+    }
+
+    function imgErr(t:String)
+    {
+        trace("Error loading image: " + t);
+        ready = true;
     }
 
     var drawWait:Float = 0;

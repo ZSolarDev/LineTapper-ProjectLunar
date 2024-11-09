@@ -1,9 +1,16 @@
 package states;
 
 
+import flixel.math.FlxMath;
+import openfl.events.Event;
+import sys.thread.Thread;
+import openfl.net.URLRequest;
+import openfl.events.IOErrorEvent;
+import openfl.net.URLLoader;
 import flixel.util.FlxTimer;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.ui.FlxBar;
 
 /**
  * That one animation that starts when the game boots up.
@@ -17,15 +24,19 @@ class IntroState extends FlxState {
 	var ltText:FlxText;
     
     var playing:Bool = false;
-    var currentlyLoading:Bool = false;
+    var finishedIntro:Bool = false;
+    
+    var doneLoading:Bool = false;
+    var loadingStages:Float = 1;
+    var curLoadingStage:Float = 0;
+    var lerpProg:Float;
+    var progBar:FlxBar;
 
 	override function create():Void
 	{
         Common.initialize();
-        haxe.Timer.measure(()->{
-            loadIntro();
-            animateIntro();
-        });
+        loadIntro();
+        animateIntro();
 
 		super.create();
 	}
@@ -52,8 +63,16 @@ class IntroState extends FlxState {
 		ltText.setFormat(Assets.font("extenro-bold"), 18, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		ltText.screenCenter(X);
         ltText.y = playerBox.y + playerBox.height + 20;
-        
         add(ltText);
+
+        progBar = new FlxBar(0, FlxG.height * 0.9, FlxBarFillDirection.LEFT_TO_RIGHT, 601, 35, this, 'lerpProg', 0, loadingStages, true);
+		progBar.scale.x = 2;
+		progBar.scale.y = 1.2;
+		progBar.screenCenter(X);
+		progBar.scrollFactor.set();
+		progBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE, true, FlxColor.WHITE);
+		add(progBar);
+        progBar.alpha = 0;
     }
 
     var _textFlicker:Bool = false;
@@ -91,13 +110,37 @@ class IntroState extends FlxState {
                             tileBox.kill();
                             tileBox.destroy();
                             remove(tileBox);
-                            currentlyLoading = true;
+                            finishedIntro = true;
+                            FlxTween.tween(progBar, {alpha:1}, 0.5, {ease:FlxEase.circIn});
+                            loadGame();
                         }});
                     });
                 }});
             }});
         });
+    }
 
+    function loadGame()
+    {
+        // I love threads
+        Thread.create(() -> {
+            var img:URLLoader;
+            try{
+                img = new URLLoader(new URLRequest(Common.PLAYER.profile_url));
+                img.dataFormat = BINARY;
+                img.addEventListener(Event.COMPLETE, (e:Event) -> {
+                    Common.PLAYER_PFP_DATA = img.data;
+                });
+                img.addEventListener(IOErrorEvent.IO_ERROR, (e:IOErrorEvent) -> {
+                    trace("Error loading profile image: " + e.text);
+                    // Handle the error (e.g., fallback, retry, notify the user, etc.)
+                });
+            } catch (e) {
+                trace("Error loading profile image: " + e.message);
+            }
+            curLoadingStage += 1;
+            doneLoading = true;
+        });
     }
 
     override function update(elapsed:Float) {
@@ -113,14 +156,16 @@ class IntroState extends FlxState {
             FlxG.sound.resume();
             FlxG.switchState(new MenuDebugState());
         }
+        lerpProg = FlxMath.lerp(curLoadingStage, lerpProg, 0.9);
+        if (lerpProg >= 0.9)
+            lerpProg = 1;
         super.update(elapsed);
     }
 
     var _rotateTime:Float = 0;
     function loadingSeqUpdate(elapsed:Float) {
-        if (!currentlyLoading) return;
-
-        if (_rotateTime > 3) {
+        if (!finishedIntro) return;
+        if (doneLoading) {
             playerBox.angle = 0;
             if (!playing){
                 playing = true;
@@ -128,6 +173,10 @@ class IntroState extends FlxState {
                 FlxTween.tween(ltText, {alpha:0}, 2, {ease:FlxEase.circIn, onComplete:(_)->{
                     ltText.destroy();
                     remove(ltText);
+                }});
+                FlxTween.tween(progBar, {alpha:0}, 2, {ease:FlxEase.circIn, onComplete:(_)->{
+                    progBar.destroy();
+                    remove(progBar);
                 }});
                 new FlxTimer().start(5.5, function(_){
                     FlxG.switchState(new MenuState(true));

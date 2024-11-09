@@ -1,5 +1,6 @@
 package game.backend.utils;
 
+import openfl.utils.ByteArray;
 import sys.thread.Thread;
 import objects.tiles.ArrowTile;
 import sys.thread.Thread;
@@ -49,6 +50,7 @@ class Common {
             }
         };
     }
+    public static var PLAYER_PFP_DATA:ByteArray;
     /**
      * Converts a Boolean to an Integer.
      * 
