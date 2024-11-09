@@ -16,32 +16,19 @@ enum abstract Direction(Int) {
 	var RIGHT = 3;
 }
 
-typedef TileData = {
-    var x:Float;
-    var y:Float;
-    var step:Float;
-}
-
-enum abstract PlayerState(Int) {
-	var MOVING = 0;
-	var WAITING = 1;
-}
-
 class Player extends FlxSprite {
 	public static var BOX_SIZE:Int = 50;
 	public var direction:Direction = DOWN;
 	public var nextDirection:Direction = DOWN;
 
-    public var curState:PlayerState = WAITING;
-
     /** A progress from previous tile to the next tile from 0 to 1. **/
 	public var tileProgress:Float = 0;
 
-    /** Defines next hittable tile. **/
-    public var tileDatas:Array<TileData> = [];
+	/** Defines next hittable tile. **/
+	public var nextTileData:{x:Float,y:Float,step:Float} = {x:0,y:0,step:0};
 
-    /** Defines current tile data. **/
-	public var curTileDataIndex:Int = -1;
+	/** Defines last tile data. **/
+	public var lastTileData:{x:Float,y:Float,step:Float} = {x:0,y:0,step:0};
 
 
 	public var speed:Float = 1;
@@ -200,8 +187,6 @@ class Player extends FlxSprite {
 			// i want to die :sob:
 			var tOffset:Float = timeDiff * (BOX_SIZE / Conductor.instance.step_ms) * states.PlayState.instance.speedRate;
 
-            if (Conductor.instance.current_steps > nextTile.step - 1 && !nextTile.hit)
-                direction = nextTile.direction;
 			if (hitable) {
 				if (pressArray[cast nextTile.direction] && !nextTile.hit) {
 					PlayState.instance.onTileHit(nextTile);
@@ -210,105 +195,86 @@ class Player extends FlxSprite {
 				PlayState.instance.onTileMiss(nextTile);
 			}
 		}
+        _handleMovements(tile_group);
+	}
+
+    private function _handleMovements(tile_group:FlxTypedGroup<ArrowTile>) {
+		var nextTile:ArrowTile = null;
+		var lastTile:ArrowTile = null;
+	
+		for (tile in tile_group.members) {
+			if (tile == null || tile.hit || tile.missed)
+				continue;
+	
+			if (tile.step > currentStep) {
+				nextTile = tile;
+				break;
+			}
+		}
+	
+		for (tile in tile_group.members) {
+			if (tile == null)
+				continue;
+	
+			if (tile.step <= currentStep) 
+				lastTile = tile;
+		}
+	
+		if (nextTile != null)
+			nextTileData = {x:nextTile.x, y:nextTile.y, step:nextTile.step};
+		if (lastTile != null)
+			lastTileData = {x:lastTile.x, y:lastTile.y, step:lastTile.step};
 	}
 
 	private function updateMovement(elapsed:Float) {
 		if (!started)
 			return;
 
-        switch (curState){
-		    case MOVING:
-                movePlayer(elapsed);
-            case WAITING:
-                wait(elapsed);
-        }
+		var validCheck:Bool = nextTileData != null && lastTileData != null;
+		FlxG.watch.addQuick("Using new method?", validCheck);
+		FlxG.watch.addQuick("Tiles", (nextTileData) + " // " + (lastTileData));
+		if (validCheck) {
+			var targetTime:Float = nextTileData.step * Conductor.instance.step_ms;
+			var lastTime:Float = lastTileData.step * Conductor.instance.step_ms;
+			var curTime:Float = Conductor.instance.time;
+		
+			FlxG.watch.addQuick("Times", targetTime + " // " + lastTime);
+		
+			if (targetTime != lastTime) {
+				tileProgress = (curTime - lastTime) / (targetTime - lastTime);
+		
+				targetX = lastTileData.x + (nextTileData.x - lastTileData.x) * tileProgress;
+				targetY = lastTileData.y + (nextTileData.y - lastTileData.y) * tileProgress;
+		
+				FlxG.watch.addQuick("Player Progress", tileProgress);
+			}
+		} else { // Use legacy method of movement
+			var addX:Float = 0;
+			var addY:Float = 0;
+	
+			elapsed *= 1000;
+	
+			var moveVel:Float = ((BOX_SIZE / Conductor.instance.step_ms) * states.PlayState.instance.speedRate) * elapsed;
+	
+			switch (direction) {
+				case Direction.LEFT:
+					addX -= moveVel;
+				case Direction.DOWN:
+					addY += moveVel;
+				case Direction.UP:
+					addY -= moveVel;
+				case Direction.RIGHT:
+					addX += moveVel;
+			}
+	
+			targetX += addX;
+			targetY += addY;
+	
+			if (direction == Direction.LEFT || direction == Direction.RIGHT) {
+				targetY = Math.round(targetY / BOX_SIZE) * BOX_SIZE;
+			} else if (direction == Direction.UP || direction == Direction.DOWN) {
+				targetX = Math.round(targetX / BOX_SIZE) * BOX_SIZE;
+			}
+		}
 	}
-
-    function wait(elapsed:Float)
-    {
-        curTileDataIndex++;
-        curState = MOVING;
-    }
-
-    function movePlayer(elapsed:Float) {
-        var nextTileData = null;
-        if (curTileDataIndex + 1 >= 0)
-            nextTileData = tileDatas[curTileDataIndex + 1];
-        var lastTileData = null;
-        if (curTileDataIndex - 1 >= 0)
-            lastTileData = tileDatas[curTileDataIndex - 1];
-        
-        var validCheck:Bool = nextTileData != null;
-        FlxG.watch.addQuick("Using new method?", validCheck);
-        FlxG.watch.addQuick("Tiles", (nextTileData == null ? 'null' : '$nextTileData') + " // " + (lastTileData == null ? 'null' : '$lastTileData'));
-        if (validCheck) {
-            conductorBasedMovement(elapsed);
-        } else { // Use non-conductor based movement method
-            velocityBasedMovement(elapsed);
-        }
-    }
-
-    function conductorBasedMovement(elapsed:Float)
-    {
-        var lastTileData = tileDatas[curTileDataIndex - 1];
-        var curTileData = tileDatas[curTileDataIndex];
-        if (lastTileData != null) {
-            var targetTime:Float = curTileData.step * Conductor.instance.step_ms;
-		    var lastTime:Float = lastTileData.step * Conductor.instance.step_ms;
-		    var curTime:Float = Conductor.instance.time;
-
-            var candidateX:Float = -1;
-            var candidateY:Float = -1;
-
-		    FlxG.watch.addQuick("Times", targetTime + " // " + lastTime);
-
-            if (Conductor.instance.current_steps < curTileData.step){
-		        if (targetTime != lastTime) {
-		        	tileProgress = (curTime - lastTime) / (targetTime - lastTime);
-
-		        	candidateX = lastTileData.x + (curTileData.x - lastTileData.x) * tileProgress;
-		        	candidateY = lastTileData.y + (curTileData.y - lastTileData.y) * tileProgress;
-
-                    targetX = candidateX;
-                    targetY = candidateY;
-                    FlxG.watch.addQuick("Player Progress", tileProgress);
-		        }
-            } else {
-                curState = WAITING;
-            }
-        } else {
-            curState = WAITING;
-            velocityBasedMovement(elapsed);
-        }
-    }
-
-    function velocityBasedMovement(elapsed:Float)
-    {
-        var addX:Float = 0;
-        var addY:Float = 0;
-
-        elapsed *= 1000;
-
-        var moveVel:Float = ((BOX_SIZE / Conductor.instance.step_ms) * states.PlayState.instance.speedRate) * elapsed;
-
-        switch (direction) {
-            case Direction.LEFT:
-                addX -= moveVel;
-            case Direction.DOWN:
-                addY += moveVel;
-            case Direction.UP:
-                addY -= moveVel;
-            case Direction.RIGHT:
-                addX += moveVel;
-        }
-
-        targetX += addX;
-        targetY += addY;
-
-        if (direction == Direction.LEFT || direction == Direction.RIGHT) {
-            targetY = Math.round(targetY / BOX_SIZE) * BOX_SIZE;
-        } else if (direction == Direction.UP || direction == Direction.DOWN) {
-            targetX = Math.round(targetX / BOX_SIZE) * BOX_SIZE;
-        }
-    }
 }
