@@ -29,6 +29,7 @@ class IntroState extends FlxState {
     var doneLoading:Bool = false;
     var loadingStages:Float = 1;
     var curLoadingStage:Float = 0;
+    var lerpAngle:Float = 0;
     var lerpProg:Float;
     var progBar:FlxBar;
 
@@ -168,7 +169,8 @@ class IntroState extends FlxState {
     function loadingSeqUpdate(elapsed:Float) {
         if (!finishedIntro) return;
         if (doneLoading) {
-            playerBox.angle = 0;
+            lerpAngle = FlxMath.lerp(0, lerpAngle, 0.9);
+            playerBox.angle = lerpAngle;
             if (!playing){
                 playing = true;
                 FlxG.sound.playMusic(Assets.music('menu_music'));
@@ -187,6 +189,7 @@ class IntroState extends FlxState {
         } else {
             _rotateTime += elapsed;
             playerBox.angle = FlxEase.expoInOut(_rotateTime%1)*(-90);
+            lerpAngle = FlxEase.expoInOut(_rotateTime%1)*(-90);
         }
    
     }
