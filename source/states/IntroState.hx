@@ -106,6 +106,13 @@ class IntroState extends FlxState {
 
         if (FlxG.keys.justPressed.SPACE) 
             FlxG.resetState();
+        if (FlxG.keys.justPressed.ESCAPE){
+            FlxG.sound.playMusic(Assets.music('menu_music'), 1, false);
+            FlxG.sound.pause();
+            FlxG.sound.music.time = 6850;
+            FlxG.sound.resume();
+            FlxG.switchState(new MenuDebugState());
+        }
         super.update(elapsed);
     }
 

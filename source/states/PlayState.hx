@@ -1,5 +1,6 @@
 package states;
 
+import haxe.ds.ArraySort;
 import lime.app.Application;
 import objects.tiles.TextTileEffect;
 import flixel.util.typeLimit.OneOfTwo;
@@ -232,6 +233,7 @@ class PlayState extends StateBase
 			var _theme:MapTheme = linemap.theme;
 			var arrowTile = new ArrowTile(posX, posY, direction, curStep, _theme.tileColorData, this);
 			tile_group.add(arrowTile);
+            player.tileDatas.push({x: posX, y: posY, step: curStep});
 
 			current_direction = direction;
 		}
