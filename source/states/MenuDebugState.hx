@@ -62,9 +62,9 @@ class MenuDebugState extends FlxState {
     function handleKeyInput(elapsed:Float) {
         if (FlxG.keys.justPressed.ENTER) {
             if (song.length > 0){
-                if (FileSystem.exists('${Assets._MAP_PATH}/$song')){
+                if (FileSystem.exists('maps/$song')){
                     FlxG.switchState(new PlayState(song.trim().toLowerCase()));
-                    FlxG.sound.play(Assets.sound("menu/key_press"));
+                    FlxG.sound.play(Assets.sound('Global Assets', 'key-press'));
                 }else{
                     FlxFlicker.flicker(inputText, 1, 0.02, true);
                     inputText.color = FlxColor.RED;
@@ -99,15 +99,15 @@ class MenuDebugState extends FlxState {
                     var key:FlxKey = i.ID;
                     switch (key) {
                         case FlxKey.BACKSPACE:
-                            FlxG.sound.play(Assets.sound("menu/key_cancel"));
+                            FlxG.sound.play(Assets.sound('Global Assets', 'key-cancel'));
                             song = song.substring(0, song.length - 1);
                         case FlxKey.SPACE:
-                            FlxG.sound.play(Assets.sound("menu/key_press"));
+                            FlxG.sound.play(Assets.sound('Global Assets', 'key-press'));
                             song += " ";
                         default:
                             var keyName:String = Std.string(key);
                             if (allowedKeys.contains(keyName)) {
-                                FlxG.sound.play(Assets.sound("menu/key_press"));
+                                FlxG.sound.play(Assets.sound('Global Assets', 'key-press'));
                                 keyName = FlxG.keys.pressed.SHIFT ? keyName.toUpperCase() : keyName.toLowerCase();
                                 song += keyName;
                                 if (song.length >= 25) song = song.substring(1);

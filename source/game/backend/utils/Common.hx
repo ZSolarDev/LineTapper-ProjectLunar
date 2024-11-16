@@ -1,5 +1,6 @@
 package game.backend.utils;
 
+import game.backend.utils.IniParser.Ini;
 import openfl.utils.ByteArray;
 import sys.thread.Thread;
 import objects.tiles.ArrowTile;
@@ -88,27 +89,18 @@ class Common {
      */
     public static var PLAYER:User = null;
 
+    /**
+	 * The name of the current theme.
+	 */
+    public static var CURRENT_THEME_NAME:String = 'Default';
+
+    /**
+	 * The .ini of the current theme.
+	 */
+    public static var CURRENT_THEME:Ini;
+
     public static final TRANSITION_TIME:Float = 1;
     public static function switchState(state:FlxState, ?transIn){}
-
-    public static function initialize():Void {
-        loadUser();
-    }
-
-    public static function loadUser():Void {
-        if (PLAYER != null) {
-            trace("User are already logged in!");
-            return;
-        }
-
-        // For testing purposes
-        PLAYER = {
-            id: 1,
-            username: "corecathx",
-            display: "CoreCat",
-            profile_url: 'https://cdn.discordapp.com/avatars/694791036094119996/08795150028fbab041c2cc9359bc5e43.png?size=1024' 
-        }
-    }
 
     /**
      * Get HH:MM:SS formatted time from miliseconds.

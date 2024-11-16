@@ -31,7 +31,9 @@
 
 	<set name="BUILD_DIR" value="export" />
 	<source path="source" />
-	<assets path="assets"/>
+	<assets path="exportData/themes" rename="themes" />
+    <assets path="exportData/data" rename="data" />
+    <assets path="exportData/maps" rename="maps" />
 
 	<!-- _____________________________ Game Settings ____________________________ -->
 	<!-- You can change these settings to whatever you wanted.-->
@@ -42,6 +44,7 @@
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
+    <haxelib name="hxIni" />
     <haxelib name="hlwnative" if="hl"/>
 	<haxelib name="hscript" if="USING_SCRIPTS"/>
     <haxelib name="hxvlc" if="cpp"/>

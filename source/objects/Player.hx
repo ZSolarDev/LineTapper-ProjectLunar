@@ -22,7 +22,7 @@ typedef TileData = {
     var step:Float;
 }
 
-enum abstract PlayerState(Int) {
+enum abstract PlayerMovementState(Int) {
 	var MOVING = 0;
 	var WAITING = 1;
 }
@@ -32,7 +32,7 @@ class Player extends FlxSprite {
 	public var direction:Direction = DOWN;
 	public var nextDirection:Direction = DOWN;
 
-    public var curState:PlayerState = WAITING;
+    public var curState:PlayerMovementState = WAITING;
 
     /** A progress from previous tile to the next tile from 0 to 1. **/
 	public var tileProgress:Float = 0;

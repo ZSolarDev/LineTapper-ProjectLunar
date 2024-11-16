@@ -21,7 +21,7 @@ class StateBase extends FlxState {
         FlxG.cameras.add(_transCam, false);
         
 
-        var _tr_bg:FlxSprite = new FlxSprite().loadGraphic(Assets.image("ui/transition"));
+        var _tr_bg:FlxSprite = new FlxSprite().loadGraphic(Assets.image('Misc UI', 'transition'));
         _tr_bg.cameras = [_transCam];
         add(_tr_bg);
         

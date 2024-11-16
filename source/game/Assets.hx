@@ -16,16 +16,8 @@ import sys.io.File;
  */
 class Assets
 {
-	/** Path to asset folders, modify only if necessary. **/
-	inline public static var _ASSET_PATH:String = "./assets";
-
-	inline public static var _DATA_PATH:String = '$_ASSET_PATH/data';
-	inline public static var _FONT_PATH:String = '$_DATA_PATH/fonts';
-	inline public static var _MAP_PATH:String = '$_DATA_PATH/maps';
-
-	inline public static var _IMAGE_PATH:String = '$_ASSET_PATH/images';
-	inline public static var _SOUND_PATH:String = '$_ASSET_PATH/sounds';
-    inline public static var _MUSIC_PATH:String = '$_ASSET_PATH/music';
+    /** Gets initialized in Common. **/
+    public static var _THEME_ASSET_PATH:String = "/themes/Default";
 
 	/** Trackers for loaded assets. **/
 	public static var loaded_images:Map<String, Bool> = new Map();
@@ -59,9 +51,9 @@ class Assets
 	 * @param name Your font's file name (without .ttf extension)
 	 * @return Font
 	 */
-	public static function font(name:String)
+	public static function font(key:String)
 	{
-		var path:String = '$_FONT_PATH/$name.ttf';
+		var path:String = '$_THEME_ASSET_PATH/${Common.CURRENT_THEME['Fonts'][key]}';
 
 		if (!FileSystem.exists(path))
 			return null;
@@ -74,26 +66,36 @@ class Assets
 	 * @param file Image file name
 	 * @return FlxGraphic (Warning: might return null)
 	 */
-	public static function image(file:String):FlxGraphic
+	public static function image(?section:String = 'Main Menu', ?key:String = 'logo'):FlxGraphic
 	{
-		var path:String = '$_IMAGE_PATH/$file.png';
+        if (Common.CURRENT_THEME == null)
+            throw "The current theme hasn't been initialized!";
+
+        if (Common.CURRENT_THEME[section] == null)
+            throw "Section " + section + " doesn't exist.";
+
+        if (Common.CURRENT_THEME[section][key] == null)
+            throw "Key " + key + " in section " + section + " doesn't exist.";
+
+		var path:String = '$_THEME_ASSET_PATH/${Common.CURRENT_THEME[section][key]}';
+        var iniAssetPath = '$section/$key';
 
 		if (!FileSystem.exists(path))
 			return null;
 
-		if (loaded_images.exists(file))
-			return FlxG.bitmap.get(file);
+		if (loaded_images.exists(iniAssetPath))
+			return FlxG.bitmap.get(iniAssetPath);
 
 		var data:Image = Image.fromFile(path);
 		var newBitmap:BitmapData = BitmapData.fromImage(data);
 
 		// Send to GPU
 
-		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, file);
+		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, iniAssetPath);
 		newGraphic.persist = true;
 
 		var n:FlxGraphic = FlxG.bitmap.addGraphic(newGraphic);
-		loaded_images.set(file, true);
+		loaded_images.set(iniAssetPath, true);
 
 		return n;
 	}
@@ -106,7 +108,7 @@ class Assets
 	 */
 	public static function map(song:String):MapAsset
 	{
-		var path:String = '$_MAP_PATH/$song';
+		var path:String = 'maps/$song';
 
 		if (!FileSystem.exists(path))
 			return null;
@@ -137,30 +139,22 @@ class Assets
 	 * @param path Sound's file name (without extension)
 	 * @return Sound
 	 */
-	inline public static function sound(name:String):Sound
-		return _sound_file('$_SOUND_PATH/$name.ogg');
-
-    /**
-	 * Returns a sound file in the music folder
-	 * @param path Music's file name (without extension)
-	 * @return Sound
-	 */
-	inline public static function music(name:String):Sound
-		return _sound_file('$_MUSIC_PATH/$name.ogg');
+	inline public static function sound(?section:String = 'Global Assets', ?key:String = 'key-press'):Sound
+		return _sound_file('$_THEME_ASSET_PATH/${Common.CURRENT_THEME[section][key]}');
 
 	/**
 	 * [INTERNAL] Loads a sound file
-	 * @param path Path to the sound file
+	 * @param soundPath Path to the sound file
 	 * @return Sound
 	 */
-	public static function _sound_file(path:String):Sound
+	public static function _sound_file(soundPath:String):Sound
 	{
-		if (!FileSystem.exists(path))
+		if (!FileSystem.exists(soundPath))
 			return null;
 
-		if (!loaded_sounds.exists(path))
-			loaded_sounds.set(path, Sound.fromFile(path));
+		if (!loaded_sounds.exists(soundPath))
+			loaded_sounds.set(soundPath, Sound.fromFile(soundPath));
 
-		return loaded_sounds.get(path);
+		return loaded_sounds.get(soundPath);
 	}
 }

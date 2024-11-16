@@ -97,7 +97,7 @@ class PlayState extends StateBase
 		instance = this;
 
         initSong();
-		scripts = new ScriptGroup('${Assets._MAP_PATH}/$mapName/scripts/');
+		scripts = new ScriptGroup('maps/$mapName/scripts/');
 		scripts.executeFunc("create");
 
 		initCameras();
@@ -405,7 +405,7 @@ class PlayState extends StateBase
                             hasCustomBG = false;
                         }
                     #else
-                        gameBG = new Background(bgType, 'assets/data/maps/$mapName/mapAssets/${linemap.theme.bgData.bg}${bgType == IMAGE ? '.png' : bgType == VIDEO ? '.mp4' : '.png'}', linemap.theme.bgData.scaleX, linemap.theme.bgData.scaleY, linemap.theme.bgData.alpha);
+                        gameBG = new Background(bgType, 'maps/$mapName/mapAssets/${linemap.theme.bgData.bg}${bgType == IMAGE ? '.png' : bgType == VIDEO ? '.mp4' : '.png'}', linemap.theme.bgData.scaleX, linemap.theme.bgData.scaleY, linemap.theme.bgData.alpha);
                         gameBG.setVideoTime = true;
                         add(gameBG);
                     #end
@@ -471,7 +471,7 @@ class PlayState extends StateBase
         if (tile != null && tile.squareTileEffect != null){
             hitStatus = ArrowTile.tileRatingToString(ratingName);
             scripts.executeFunc("onTileHit", [tile]);
-            FlxG.sound.play(Assets.sound("hit_sound"), 0.7);
+            FlxG.sound.play(Assets.sound('Gameplay', 'hit-sound'), 0.7);
             tile.onTileHit();
             if (using_autoplay)
                 updatePlayerPosition(tile);

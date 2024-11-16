@@ -66,7 +66,7 @@ class MenuState extends StateBase {
 
 		generateOptions();
 
-		logo = new FlxSprite().loadGraphic(Assets.image("menu/logo-pl"));
+		logo = new FlxSprite().loadGraphic(Assets.image('Main Menu', 'logo'));
 		logo.screenCenter(X);
 		logo.y = 30;
 		logo.scale.set(0.6, 0.6);
@@ -89,7 +89,7 @@ class MenuState extends StateBase {
             FlxFlicker.flicker(logo, 0.5, 0.02, true);
         });
         }else{
-            FlxG.sound.playMusic(Assets.music('menu_music'), 1, false);
+            FlxG.sound.playMusic(Assets.sound('Main Menu', 'menu-music'), 1, false);
             FlxG.sound.pause();
             FlxG.sound.music.time = 6850;
             FlxG.sound.resume();
@@ -116,13 +116,13 @@ class MenuState extends StateBase {
 			menuGroup.add(txt);
 		}
 
-		tri_top = new FlxSprite().loadGraphic(Assets.image("ui/triangle"));
+		tri_top = new FlxSprite().loadGraphic(Assets.image('Misc UI', 'triangle'));
 		tri_top.screenCenter(X);
 		tri_top.y = boxBelow.y - (tri_top.height + 5);
 		tri_top.flipY = true;
 		add(tri_top);
 
-		tri_bot = new FlxSprite().loadGraphic(Assets.image("ui/triangle"));
+		tri_bot = new FlxSprite().loadGraphic(Assets.image('Misc UI', 'triangle'));
 		tri_bot.screenCenter(X);
 		tri_bot.y = boxBelow.y + boxBelow.height + 5;
 		add(tri_bot);
@@ -155,7 +155,7 @@ class MenuState extends StateBase {
 
 	override function update(elapsed:Float) {
         if (!FlxG.sound.music.playing) {
-            FlxG.sound.playMusic(Assets.music('menu_music'), 1, false);
+            FlxG.sound.playMusic(Assets.sound('Main Menu', 'menu-music'), 1, false);
             FlxG.sound.pause();
             FlxG.sound.music.time = 6850;
             FlxG.sound.resume();
@@ -180,7 +180,7 @@ class MenuState extends StateBase {
 			}
 
 			if (FlxG.keys.justPressed.LEFT || FlxG.keys.justPressed.RIGHT) {
-				FlxG.sound.play(Assets.sound("menu/key_press"));
+				FlxG.sound.play(Assets.sound('Global Assets', 'key-press'));
 				tri_top.y -= 10; // stupid
 				tri_bot.y += 10;
 				curSelected = FlxMath.wrap(curSelected + (FlxG.keys.justPressed.LEFT ? 1 : -1), 0, options.length - 1);

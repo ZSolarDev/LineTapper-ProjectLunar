@@ -1,5 +1,8 @@
 package game.backend;
 
+import sys.io.File;
+import sys.FileSystem;
+
 class TempFile {
     public var pathFromTemp(default, null):String = '';
     public var content:String = '';

@@ -1,6 +1,7 @@
 package states;
 
 
+import game.backend.utils.InitUtil;
 import flixel.math.FlxMath;
 import openfl.events.Event;
 import sys.thread.Thread;
@@ -27,7 +28,7 @@ class IntroState extends FlxState {
     var finishedIntro:Bool = false;
     
     var doneLoading:Bool = false;
-    var loadingStages:Float = 1;
+    var loadingStages:Float = 2;
     var curLoadingStage:Float = 0;
     var lerpAngle:Float = 0;
     var lerpProg:Float;
@@ -35,7 +36,7 @@ class IntroState extends FlxState {
 
 	override function create():Void
 	{
-        Common.initialize();
+        preLoadGame();
         loadIntro();
         animateIntro();
 
@@ -52,7 +53,7 @@ class IntroState extends FlxState {
         add(playerBox);
 
         // Tile Box sprite
-        tileBox = new FlxSprite().loadGraphic(Assets.image("arrow_tile"));
+        tileBox = new FlxSprite().loadGraphic(Assets.image("Gameplay", 'arrow-tile'));
         tileBox.setGraphicSize(playerBox.frameWidth, playerBox.frameHeight);
         tileBox.updateHitbox();
         tileBox.x = ((FlxG.width - tileBox.width) * 0.5) + _centerOffset;
@@ -113,7 +114,7 @@ class IntroState extends FlxState {
                             remove(tileBox);
                             finishedIntro = true;
                             FlxTween.tween(progBar, {alpha:1}, 0.5, {ease:FlxEase.circIn});
-                            loadGame();
+                            postLoadGame();
                         }});
                     });
                 }});
@@ -121,30 +122,24 @@ class IntroState extends FlxState {
         });
     }
 
-    function loadGame()
+    function preLoadGame()
+    {
+        InitUtil.initTheme();
+    }
+
+    function postLoadGame()
     {
         // I love threads
         Thread.create(() -> {
-            var img:URLLoader;
-            try{
-                img = new URLLoader();
-                img.dataFormat = BINARY;
-                img.addEventListener(Event.COMPLETE, (e:Event) -> {
-                    Common.PLAYER_PFP_DATA = img.data;
-                });
-                img.addEventListener(IOErrorEvent.IO_ERROR, (e:IOErrorEvent) -> {
-                    trace("Error loading profile image: " + e.text);
-                    // Handle the error (e.g., fallback, retry, notify the user, etc.)
-                });
-                
-                img.load(new URLRequest(Common.PLAYER.profile_url));
-            } catch (e) {
-                trace("Error loading profile image: " + e.message);
-            }
-            curLoadingStage += 1;
+            InitUtil.loadUser();
+            curLoadingStage++;
+            InitUtil.loadProfileImage();
+            curLoadingStage++;
             doneLoading = true;
         });
     }
+
+    
 
     override function update(elapsed:Float) {
         flickerEffectUpdate(elapsed);
@@ -153,39 +148,43 @@ class IntroState extends FlxState {
         if (FlxG.keys.justPressed.SPACE) 
             FlxG.resetState();
         if (FlxG.keys.justPressed.ESCAPE){
-            FlxG.sound.playMusic(Assets.music('menu_music'), 1, false);
+            FlxG.sound.playMusic(Assets.sound('Main Menu', 'menu-music'), 1, false);
             FlxG.sound.pause();
             FlxG.sound.music.time = 6850;
             FlxG.sound.resume();
             FlxG.switchState(new MenuDebugState());
         }
         lerpProg = FlxMath.lerp(curLoadingStage, lerpProg, 0.9);
-        if (lerpProg >= 0.9)
-            lerpProg = 1;
+        if (lerpProg >= curLoadingStage - 1 + 0.9)
+            lerpProg = curLoadingStage;
         super.update(elapsed);
     }
 
     var _rotateTime:Float = 0;
+    var progBarTween:FlxTween;
     function loadingSeqUpdate(elapsed:Float) {
         if (!finishedIntro) return;
         if (doneLoading) {
             lerpAngle = FlxMath.lerp(0, lerpAngle, 0.9);
             playerBox.angle = lerpAngle;
+            if (progBarTween == null)
+                progBar.alpha = 1;
             if (!playing){
                 playing = true;
-                FlxG.sound.playMusic(Assets.music('menu_music'));
+                FlxG.sound.playMusic(Assets.sound('Main Menu', 'menu-music'));
                 FlxTween.tween(ltText, {alpha:0}, 2, {ease:FlxEase.circIn, onComplete:(_)->{
                     ltText.destroy();
                     remove(ltText);
                 }});
-                FlxTween.tween(progBar, {alpha:0}, 2, {ease:FlxEase.circIn, onComplete:(_)->{
+                progBarTween = FlxTween.tween(progBar, {alpha:0}, 2, {ease:FlxEase.circIn, onComplete:(_)->{
                     progBar.destroy();
                     remove(progBar);
                 }});
+                progBarTween.start();
                 new FlxTimer().start(5.5, function(_){
                     FlxG.switchState(new MenuState(true));
                 });
-            }
+            }   
         } else {
             _rotateTime += elapsed;
             playerBox.angle = FlxEase.expoInOut(_rotateTime%1)*(-90);

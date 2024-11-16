@@ -47,7 +47,6 @@ class Profile extends FlxSprite {
         super(nX,nY);
         // Loads the profile image
         trace("Preparing");
-        var img:URLLoader;
         
         var temp:FlxSprite = new FlxSprite().loadGraphic(Common.PLAYER_PFP_DATA != null ? BitmapData.fromBytes(Common.PLAYER_PFP_DATA) : '');
         var circ:FlxSprite = new FlxSprite().makeGraphic(Std.int(temp.width),Std.int(temp.height),FlxColor.TRANSPARENT);
@@ -66,12 +65,6 @@ class Profile extends FlxSprite {
         _parent_effect.antialiasing = true;
         _parent_effect.skew.x = -30;
 
-        ready = true;
-    }
-
-    function imgErr(t:String)
-    {
-        trace("Error loading image: " + t);
         ready = true;
     }
 

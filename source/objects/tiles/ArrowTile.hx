@@ -91,7 +91,7 @@ enum abstract TileRating(String) from String to String {
 		if (tileColorData != null)
 			this.tileColorData = tileColorData;
 
-		loadGraphic(Assets.image("arrow_tile"));
+		loadGraphic(Assets.image('Gameplay', 'arrow-tile'));
 		setGraphicSize(Player.BOX_SIZE, Player.BOX_SIZE);
 		updateHitbox();
 		updateColors();
