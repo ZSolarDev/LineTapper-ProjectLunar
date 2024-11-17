@@ -1,7 +1,5 @@
 package objects;
 
-import flixel.util.FlxTimer;
-import openfl.display.BitmapData;
 import flixel.group.FlxGroup;
 import game.backend.Video;
 

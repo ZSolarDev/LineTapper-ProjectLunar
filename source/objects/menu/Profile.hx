@@ -1,18 +1,9 @@
 package objects.menu;
 
-import sys.thread.Thread;
-import openfl.events.IOErrorEvent;
 import flixel.util.FlxSpriteUtil;
 import haxe.Timer;
-import flixel.math.FlxMath;
 import flixel.addons.effects.FlxSkewedSprite;
-import openfl.utils.ByteArray;
-import openfl.events.ProgressEvent;
 import openfl.display.BitmapData;
-import openfl.events.Event;
-
-import openfl.net.URLRequest;
-import openfl.net.URLLoader;
 
 @:structInit
 class User {

@@ -2,9 +2,7 @@ package game;
 
 import game.backend.Lyrics;
 import game.MapData.MapAsset;
-import openfl.display3D.textures.RectangleTexture;
 import flixel.graphics.FlxGraphic;
-import game.MapData.LineMap;
 import lime.graphics.Image;
 import openfl.display.BitmapData;
 import openfl.media.Sound;

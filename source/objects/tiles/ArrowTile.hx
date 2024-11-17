@@ -1,12 +1,10 @@
 package objects.tiles;
 
 import states.PlayState;
-import flixel.effects.FlxFlicker;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import game.Conductor;
-import objects.tiles.ArrowTile.MapTileColorData;
 import objects.Player.Direction;
 
 /**

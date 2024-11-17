@@ -3,11 +3,7 @@ package states;
 
 import game.backend.utils.InitUtil;
 import flixel.math.FlxMath;
-import openfl.events.Event;
 import sys.thread.Thread;
-import openfl.net.URLRequest;
-import openfl.events.IOErrorEvent;
-import openfl.net.URLLoader;
 import flixel.util.FlxTimer;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;

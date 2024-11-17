@@ -3,9 +3,7 @@ package states;
 import flixel.util.FlxTimer;
 import flixel.graphics.FlxGraphic;
 import objects.menu.Profile;
-import objects.Player;
 import flixel.math.FlxMath;
-import haxe.Constraints.Function;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
 import flixel.group.FlxSpriteGroup;

@@ -4,7 +4,6 @@ import flixel.input.FlxInput;
 import sys.FileSystem;
 import flixel.util.FlxTimer;
 
-import lime.app.Application;
 import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 

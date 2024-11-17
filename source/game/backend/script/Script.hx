@@ -4,7 +4,6 @@ import states.PlayState;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxTimer;
-import flixel.util.FlxTimer;
 import haxe.io.Path;
 import hscript.Expr;
 import hscript.Parser;

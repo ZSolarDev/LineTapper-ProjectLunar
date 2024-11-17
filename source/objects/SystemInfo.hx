@@ -1,14 +1,10 @@
 package objects;
 
 import game.backend.utils.NativeUtil;
-import flixel.FlxG;
 import flixel.math.FlxMath;
 import haxe.Timer;
-import openfl.events.Event;
-import openfl.system.System;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import sys.io.File;
 
 /**
  * FPS and Memory Usage counter that's shown on top corner left of the game.

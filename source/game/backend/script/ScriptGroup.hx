@@ -1,6 +1,5 @@
 package game.backend.script;
 
-import haxe.io.Path;
 import sys.FileSystem;
 
 /**

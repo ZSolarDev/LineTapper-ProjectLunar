@@ -1,10 +1,6 @@
 package states;
 
-import haxe.ds.ArraySort;
-import lime.app.Application;
 import objects.tiles.TextTileEffect;
-import flixel.util.typeLimit.OneOfTwo;
-import lime.math.Vector2;
 import flixel.ui.FlxBar;
 import objects.Background;
 import game.backend.Lyrics;
@@ -14,16 +10,13 @@ import flixel.util.FlxTimer;
 import game.backend.script.ScriptGroup;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
-import flixel.addons.display.FlxTiledSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.util.FlxGradient;
 import game.Conductor;
-import game.MapData.LineMap;
 import game.MapData;
 import objects.tiles.ArrowTile;
 import objects.Player;
-import sys.io.File;
 
 typedef Rating = {
     var count:Int;

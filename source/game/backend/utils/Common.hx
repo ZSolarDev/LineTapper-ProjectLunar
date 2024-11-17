@@ -2,11 +2,7 @@ package game.backend.utils;
 
 import game.backend.utils.IniParser.Ini;
 import openfl.utils.ByteArray;
-import sys.thread.Thread;
 import objects.tiles.ArrowTile;
-import sys.thread.Thread;
-import sys.io.File;
-import sys.FileSystem;
 import objects.menu.Profile.User;
 
 using StringTools;
