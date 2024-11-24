@@ -9,7 +9,7 @@ import flixel.math.FlxMath;
 
 using StringTools;
 
-class MenuDebugState extends FlxState {
+class MenuDebugState extends StateBase {
     var topText:FlxText;
     var inputText:FlxText;
     var noType:Bool = false;

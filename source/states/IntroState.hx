@@ -12,7 +12,7 @@ import flixel.ui.FlxBar;
 /**
  * That one animation that starts when the game boots up.
  */
-class IntroState extends FlxState {
+class IntroState extends StateBase {
     public static var _boxSize:Int = 72;
     public static var _scaleDec:Float = 0.3;
 
@@ -24,15 +24,20 @@ class IntroState extends FlxState {
     var finishedIntro:Bool = false;
     
     var doneLoading:Bool = false;
+    var initializer:InitUtil;
     var loadingStages:Float = 2;
     var curLoadingStage:Float = 0;
     var lerpAngle:Float = 0;
     var lerpProg:Float;
     var progBar:FlxBar;
 
+    override public function new(?transInEnabled:Bool = true, ?trans_name:String = "") {
+        preLoadGame();
+        super(transInEnabled, trans_name);
+    }
+
 	override function create():Void
 	{
-        preLoadGame();
         loadIntro();
         animateIntro();
 
@@ -120,6 +125,10 @@ class IntroState extends FlxState {
 
     function preLoadGame()
     {
+        initializer = new InitUtil();
+        initializer.initMapThumbnailLoading();
+        loadingStages += initializer.mapThumbnailProgTotal;
+        initializer.thumbnailLoadedEvent.add(() -> {curLoadingStage++;});
         InitUtil.initTheme();
     }
 
@@ -131,11 +140,10 @@ class IntroState extends FlxState {
             curLoadingStage++;
             InitUtil.loadProfileImage();
             curLoadingStage++;
+            initializer.loadMapThumbnails();
             doneLoading = true;
         });
     }
-
-    
 
     override function update(elapsed:Float) {
         flickerEffectUpdate(elapsed);
@@ -148,7 +156,7 @@ class IntroState extends FlxState {
             FlxG.sound.pause();
             FlxG.sound.music.time = 6850;
             FlxG.sound.resume();
-            FlxG.switchState(new MenuDebugState());
+            switchState(new MenuDebugState());
         }
         lerpProg = FlxMath.lerp(curLoadingStage, lerpProg, 0.9);
         if (lerpProg >= curLoadingStage - 1 + 0.9)
@@ -178,7 +186,7 @@ class IntroState extends FlxState {
                 }});
                 progBarTween.start();
                 new FlxTimer().start(5.5, function(_){
-                    FlxG.switchState(new MenuState(true));
+                    switchState('Main Menu', true);
                 });
             }   
         } else {

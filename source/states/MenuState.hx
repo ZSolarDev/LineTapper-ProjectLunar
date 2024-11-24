@@ -33,7 +33,7 @@ class MenuState extends StateBase {
 	var curSelected:Int = 0;
 	var options:Array<Dynamic> = [
 		["options", () -> trace("wawer")],
-		["play", () -> FlxG.switchState(new MenuDebugState())],
+		["play", () -> Common.switchState(new MenuDebugState())],
 		["edit", () -> trace("wawer")]
 	];
 

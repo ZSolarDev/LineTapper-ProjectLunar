@@ -98,6 +98,17 @@ class Assets
 		return n;
 	}
 
+    public static function graphicFromPath(path:String):FlxGraphic
+    {
+        if (loaded_images.exists(path))
+			return FlxG.bitmap.get(path);
+
+        var newGraphic:FlxGraphic = FlxG.bitmap.addGraphic(FlxGraphic.fromBitmapData(cast BitmapData.loadFromFile(path), false));
+        loaded_images.set(path, true);
+        newGraphic.persist = true;
+        return newGraphic;
+    }
+
 	/**
 	 * Returns MapAsset containing audio and map data.
 	 * Returns null if the map folder does not exist.

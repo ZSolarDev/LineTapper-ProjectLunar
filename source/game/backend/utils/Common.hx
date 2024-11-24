@@ -1,5 +1,8 @@
 package game.backend.utils;
 
+import states.IntroState;
+import flixel.util.typeLimit.OneOfTwo;
+import game.backend.script.ScriptState;
 import game.backend.utils.IniParser.Ini;
 import openfl.utils.ByteArray;
 import objects.tiles.ArrowTile;
@@ -96,7 +99,33 @@ class Common {
     public static var CURRENT_THEME:Ini;
 
     public static final TRANSITION_TIME:Float = 1;
-    public static function switchState(state:FlxState, ?transIn){}
+    public static function switchState(targetSectionOrState:OneOfTwo<String, FlxState>, ?arg:Dynamic = null, ?transIn:Bool = true)
+    {
+        if (Std.isOfType(targetSectionOrState, String)){
+            if (CURRENT_THEME[targetSectionOrState] != null)
+            {
+                if (CURRENT_THEME[targetSectionOrState]['HX'] != 'default')
+                {
+                    var hxPath = '${Assets._THEME_ASSET_PATH}/${CURRENT_THEME[targetSectionOrState]['HX']}';
+                    if (checkHXS(hxPath))
+                    {
+                        FlxG.switchState(new ScriptState(hxPath));
+                    }else
+                        trace('The script ($hxPath) was not a valid HScript extension, failed to switch states.');
+                }else
+                    targetSectionOrState == 'Main Menu' ? FlxG.switchState(new states.MenuState(cast arg)) : targetSectionOrState == 'Gameplay' ? FlxG.switchState(new states.PlayState()) : FlxG.switchState(new states.IntroState());
+            }else
+                trace('Section $targetSectionOrState does not exist, failed to switch states.');
+        }else{
+            if (Std.isOfType(targetSectionOrState, states.MenuState)){
+                FlxG.switchState(new states.MenuState(cast arg));
+                return;
+            }
+
+            var state:FlxState = cast targetSectionOrState;
+            FlxG.switchState(state);
+        }
+    }
 
     /**
      * Get HH:MM:SS formatted time from miliseconds.

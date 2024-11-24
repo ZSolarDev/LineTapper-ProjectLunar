@@ -46,7 +46,7 @@
 	<haxelib name="flixel" />
     <haxelib name="hxIni" />
     <haxelib name="hlwnative" if="hl"/>
-	<haxelib name="hscript" if="USING_SCRIPTS"/>
+    <haxelib name="hscript-improved" if="USING_SCRIPTS" />
     <haxelib name="hxvlc" if="cpp"/>
 
 	<!--In case you want to use the addons package-->
@@ -63,7 +63,7 @@
 	<!--Disable the native cursor API on Flash-->
 	<!--<haxedef name="FLX_NO_NATIVE_CURSOR" />-->
 
-	<!--Optimise inputs, be careful you will get null errors if you don't use conditionals in your game-->
+	<!--Optimize inputs, be careful you will get null errors if you don't use conditionals in your game-->
 	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_KEYBOARD" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
@@ -81,12 +81,14 @@
 	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
 
-	<!--Enable this for Nape release builds for a serious peformance improvement-->
+	<!--Enable this for Nape release builds for a serious performance improvement-->
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 
 	<!-- Haxe 4.3.0+: Enable pretty syntax errors and stuff. -->
 	<!-- pretty (haxeflixel default), indent, classic (haxe compiler default) -->
 	<haxedef name="message.reporting" value="pretty" />
+
+    <define name="CUSTOM_CLASSES" />
 
 	<!-- _________________________________ Custom _______________________________ -->
 

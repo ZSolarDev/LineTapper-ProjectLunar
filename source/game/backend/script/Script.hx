@@ -77,12 +77,16 @@ class Script {
         trace(filename);
 		try
 		{
-			interp.execute(parse(path));
+            var parsed = parse(path);
+            if (parsed != null)
+			    interp.execute(parsed);
+            else
+                error = true;
 		}
 		catch (e) {}
     }
 
-    public function parse(path:String) {
+    public static function parse(path:String) {
         var parser:Parser = new Parser();
         parser.allowTypes = parser.allowMetadata = parser.allowJSON = true;
         var ast:Expr = null;
@@ -94,7 +98,7 @@ class Script {
             var message:String = 'An error occured while parsing the file located at "$path".\r\n$ext at $line';
             if (!openfl.Lib.application.window.fullscreen)
                 openfl.Lib.application.window.alert(message);
-            error = true;
+            return null;
         }
         return ast;
     }
@@ -106,7 +110,7 @@ class Script {
 
     function trace(v:String)
     {
-        ScriptUtil.trace(interp, filename, v);
+        ScriptUtils.trace(interp, filename, v);
     }
 
     /**
@@ -116,34 +120,16 @@ class Script {
         setVariable("PlayState", PlayState.instance);
         setVariable("StaticPlayState", PlayState); // Don't know why this is useful but just in case..
         setVariable("trace", this.trace);
-        setVariable("addLib", function(className:String) // Similar to haxe's "import"
-        {
-            var splitClassName = [for (e in className.split(".")) e.trim()];
-            var realClassName = splitClassName.join(".");
-            var cl = Type.resolveClass(realClassName);
-            var en = Type.resolveEnum(realClassName);
-            if (cl == null && en == null) {
-                var msg = 'Class / Enum at $realClassName does not exist.';
-                this.trace(msg);
-            } else {
-                var classname:String = splitClassName[splitClassName.length - 1];
+        setVariable('ScriptUtils', ScriptUtils);
+        setVariable('add', ScriptUtils.add);
+        setVariable('Common', Common);
 
-                if (en != null) {
-                    var enumThingy = {};
-                    for (c in en.getConstructors())
-                        Reflect.setField(enumThingy, c, en.createByName(c));
-                    setVariable(classname, enumThingy);
-                } else {
-                    setVariable(classname, cl);
-                }
-                this.trace("Imported " + splitClassName[splitClassName.length - 1]);
-            }
-        });
         setVariable("FlxSprite", FlxSprite);
 		setVariable('FlxCamera', FlxCamera);
 		setVariable('FlxTimer', FlxTimer);
 		setVariable('FlxTween', FlxTween);
+        setVariable('FlxState', FlxState);
 		setVariable('FlxEase', FlxEase);
-        setVariable('add', ScriptUtil.add);
+        setVariable('FlxG', FlxG);
     }
 }

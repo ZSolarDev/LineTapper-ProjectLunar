@@ -6,7 +6,8 @@ import sys.FileSystem;
 import Lambda;
 import StringTools;
 
-// This came from HXIni, cause the original wouldn't compile.
+// This came from HXIni, had to modift some things cause the original wouldn't compile.
+
 /**
  * INI section (like [Program] or [Settings]). Used to organize variables. An Ini object is composed by IniSections.
  */
