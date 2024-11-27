@@ -8,9 +8,9 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.effects.FlxFlicker;
 
-import game.Assets;
-import game.backend.utils.Common;
-import game.backend.StateBase;
+import backend.utils.Assets;
+import backend.utils.Common;
+import backend.StateBase;
 
 using StringTools;
 #end

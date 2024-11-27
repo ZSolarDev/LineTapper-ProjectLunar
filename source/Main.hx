@@ -1,15 +1,15 @@
 package;
 
-import game.backend.utils.NativeUtil;
+import backend.utils.NativeUtil;
 import lime.app.Application;
 import flixel.FlxGame;
-import game.Conductor;
+import backend.Conductor;
 import openfl.display.Sprite;
 
 class Main extends Sprite
 {
 	public static var _conductor:Conductor;
-	public var STARTING_STATE = states.IntroState;
+	public var STARTING_STATE = frontend.states.IntroState;
 	public function new()
 	{
 		super();

@@ -1,0 +1,135 @@
+package backend.script;
+
+import frontend.states.PlayState;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxTimer;
+import haxe.io.Path;
+import hscript.Expr;
+import hscript.Parser;
+import sys.FileSystem;
+import hscript.Interp;
+
+/**
+ * HScript Handler for LineTapper.
+ */
+class Script {
+    public var filename:String = "";
+    public var interp:Interp;
+    public var error:Bool = false;
+
+    /**
+     * Loads a new script.
+     * @param path Script's path.
+     */
+    public function new(path:String) {
+        if (!FileSystem.exists(path)) {
+            trace("Failed loading song scripts, path: " + path);
+            return;
+        }
+        
+        // Actually init the interp.
+        interp = new Interp();
+        initialize();
+        loadFile(path);
+    }
+
+    /**
+     * Executes a function from the Script.
+     * @param name Function Name
+     * @param args Arguments (optional)
+     */
+    public function executeFunc(funcName:String, ?args:Array<Any>):Dynamic
+    {
+        if (interp == null)
+            return null;
+
+        if (interp.variables.exists(funcName)) {
+            var f = interp.variables.get(funcName);
+            if (args == null) {
+                var result = null;
+                try {
+                    result = f();
+                } catch (e) {
+                    Sys.println("[ERROR] " + filename + " : " + e.toString());
+                    error = true;
+                }
+                return result;
+            } else {
+                var result = null;
+                try {
+                    result = Reflect.callMethod(null, f, args);
+                } catch (e) {
+                    Sys.println("[ERROR] " + filename + " : " + e.toString());
+                    error = true;
+                }
+                return result;
+            }
+        }
+        return null;
+    }
+
+    public function loadFile(path:String) {
+        if (path.trim() == "")
+			return;
+
+        filename = Path.withoutExtension(Path.withoutDirectory(path));
+        trace(filename);
+		try
+		{
+            var parsed = parse(path);
+            if (parsed != null)
+			    interp.execute(parsed);
+            else
+                error = true;
+		}
+		catch (e) {}
+    }
+
+    public static function parse(path:String) {
+        var parser:Parser = new Parser();
+        parser.allowTypes = parser.allowMetadata = parser.allowJSON = true;
+        var ast:Expr = null;
+        try {
+            ast = parser.parseString(sys.io.File.getContent(path));
+        } catch (ex) {
+            var ext = Std.string(ex);
+            var line = parser.line;
+            var message:String = 'An error occured while parsing the file located at "$path".\r\n$ext at $line';
+            if (!openfl.Lib.application.window.fullscreen)
+                openfl.Lib.application.window.alert(message);
+            return null;
+        }
+        return ast;
+    }
+
+	public function setVariable(name:String, val:Dynamic)
+    {
+        interp.variables.set(name, val);
+    }
+
+    function trace(v:String)
+    {
+        ScriptUtils.trace(interp, filename, v);
+    }
+
+    /**
+     * Initializes the script with bunch of variables.
+     */
+    public function initialize() {
+        setVariable("PlayState", PlayState.instance);
+        setVariable("StaticPlayState", PlayState); // Don't know why this is useful but just in case..
+        setVariable("trace", this.trace);
+        setVariable('ScriptUtils', ScriptUtils);
+        setVariable('add', ScriptUtils.add);
+        setVariable('Common', Common);
+
+        setVariable("FlxSprite", FlxSprite);
+		setVariable('FlxCamera', FlxCamera);
+		setVariable('FlxTimer', FlxTimer);
+		setVariable('FlxTween', FlxTween);
+        setVariable('FlxState', FlxState);
+		setVariable('FlxEase', FlxEase);
+        setVariable('FlxG', FlxG);
+    }
+}
