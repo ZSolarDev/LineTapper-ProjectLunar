@@ -6,12 +6,14 @@ import backend.Conductor;
 
 class HoldSprite extends FlxSprite {
     public var tile:ArrowTile;
-    public var targetStepDist:Float = 2;
+    public var fadeSteps:Float = 2;
+    public var targetStepDist:Float = 15;
     public var stepDistSecs:Float = 0;
     public var isCenter:Bool = false;
     var step_sec:Float = 0;
     var called:Bool = false;
     var stepDist:Float = 0;
+    var dying:Bool = false;
 
     override public function new(tile:ArrowTile, ?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset)
     {
@@ -19,7 +21,7 @@ class HoldSprite extends FlxSprite {
         this.tile = tile;
         alpha = 0;
         step_sec = Conductor.instance.step_ms / 1000;
-        stepDistSecs = step_sec * targetStepDist;
+        stepDistSecs = step_sec * fadeSteps;
     }
     
     override public function update(elapsed:Float)
@@ -27,18 +29,15 @@ class HoldSprite extends FlxSprite {
         super.update(elapsed);
         color = tile.color;
         stepDist = Math.abs(Conductor.instance.current_steps - tile.step);
-        if (isCenter){
-            if (tile.alpha < 0.3)
-                alpha = tile.alpha;
-        }else
-            alpha = tile.alpha;
-        if (stepDist <= targetStepDist && !called){
-            called = true;
-            if (isCenter)
-                FlxTween.tween(this, {alpha: 0.3}, stepDistSecs);
-            else
-                FlxTween.tween(this, {alpha: 1}, stepDistSecs);
+        dying = tile.dying;
+        if (stepDist <= targetStepDist && !called && !dying){
+            alpha += 2 * elapsed;
+            tile.alpha = alpha;
         }
+        if (alpha > 0.3 && isCenter)
+            alpha = 0.3;
+        if (dying)
+            alpha -= 2 * elapsed;
     }
 }
 

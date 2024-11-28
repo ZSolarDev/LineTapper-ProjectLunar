@@ -18,8 +18,8 @@ class TestingState extends StateBase {
         add(tile2);
         tile2.setGraphicSize(Player.BOX_SIZE, Player.BOX_SIZE);
         tile2.updateHitbox();
-        holdRenderer = new HoldRenderer();
-        add(holdRenderer);
+        //holdRenderer = new HoldRenderer();
+        //add(holdRenderer);
         //holdRenderer.generateHold(tile1, tile2);
     }
 

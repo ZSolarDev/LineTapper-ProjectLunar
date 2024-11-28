@@ -56,7 +56,7 @@ class MenuDebugState extends StateBase {
         handleKeyInput(elapsed);
         super.update(elapsed);
     }
-    var allowedKeys:String = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var allowedKeys:String = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-';
     var keyTime:Float = 0;
     function handleKeyInput(elapsed:Float) {
         if (FlxG.keys.justPressed.ENTER) {

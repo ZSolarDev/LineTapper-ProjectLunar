@@ -20,6 +20,7 @@ typedef TileData = {
     var x:Float;
     var y:Float;
     var step:Float;
+    var isSustain:Bool;
     var isSustainEnd:Bool;
     var instance:PlayState;
     var direction:Direction;
@@ -162,17 +163,36 @@ class Player extends FlxSprite {
 			[FlxKey.W, FlxKey.UP],
 			[FlxKey.D, FlxKey.RIGHT]
 		];
-		var pressArray:Array<Bool> = [false, false, false, false];
+
+        var releasedArray:Array<Bool> = [false, false, false, false];
+		var pressedArray:Array<Bool> = [false, false, false, false];
+        var pressArray:Array<Bool> = [false, false, false, false];
 
 		for (index => keyList in keys) {
-			var pressed:Bool = false;
+			var justpressed:Bool = false;
+            var released:Bool = false;
+            var pressed:Bool = false;
 			for (key in keyList) {
 				if (FlxG.keys.checkStatus(key, JUST_PRESSED)) {
+					justpressed = true;
+					break;
+				}
+			}
+            for (key in keyList) {
+                if (FlxG.keys.checkStatus(key, PRESSED)) {
 					pressed = true;
 					break;
 				}
 			}
-			pressArray[index] = pressed;
+            for (key in keyList) {
+                if (FlxG.keys.checkStatus(key, JUST_RELEASED)) {
+					released = true;
+					break;
+				}
+			}
+			pressedArray[index] = justpressed;
+            releasedArray[index] = released;
+            pressArray[index] = pressed;
 		}
 
 		var nextTile:ArrowTile = null;
@@ -186,40 +206,48 @@ class Player extends FlxSprite {
 				nextTile = tile;
 		});
 
-        var anyPressed:Bool = false;
-        for (e in pressArray) { if (e){ anyPressed = true; } }
-        if (anyPressed) {
-            if (Conductor.instance.current_steps > tile.step && Conductor.instance.current_steps < lastTile.step + (nextTile.step-lastTile.step))
-        }
-
 		if (nextTile != null) {
-            if (nextTile.isSustainEnd)
+            var lastTile:TileData = tileDatas[ArrowTile.indexOf(ArrowTile.toTileData(nextTile), tileDatas) - 1];
+            if (nextTile.isSustainEnd && lastTile != null){
+                if (Conductor.instance.current_steps > lastTile.step && Conductor.instance.current_steps < lastTile.step + (nextTile.step-lastTile.step))
+                {
+                    if (pressArray[cast lastTile.direction] && !nextTile.hit) {
+			    		PlayState.instance.onSustainHit();
+			    	}
+                }
+            }
 			nextStep = nextTile.step;
 			nextDirection = nextTile.direction;
-
             
 			var tileTime:Float = nextTile.step * Conductor.instance.step_ms;
 			var hitable:Bool = tileTime > Conductor.instance.time - (Conductor.instance.safe_zone_offset * 1.2)
 				&& tileTime < Conductor.instance.time + (Conductor.instance.safe_zone_offset * 0.4);
             
-
 			var timeDiff:Float = tileTime - Conductor.instance.time; // + is early, - is late.
 			// i want to die :sob:
 			var tOffset:Float = timeDiff * (BOX_SIZE / Conductor.instance.step_ms) * PlayState.instance.speedRate;
-
             if (Conductor.instance.current_steps > nextTile.step - 1 && !nextTile.hit)
                 direction = nextTile.direction;
 			if (hitable) {
-				if (pressArray[cast nextTile.direction] && !nextTile.hit) {
-					PlayState.instance.onTileHit(nextTile);
-				}
+                if (nextTile.isSustainEnd)
+                {
+                    if (lastTile != null){
+                        if (releasedArray[cast lastTile.direction] && !nextTile.hit) {
+				        	PlayState.instance.onTileHit(nextTile);
+				        }
+                    }
+                }else{
+				    if (pressedArray[cast nextTile.direction] && !nextTile.hit) {
+				    	PlayState.instance.onTileHit(nextTile);
+				    }
+                }
 			} else if (!nextTile.missed && tileTime < Conductor.instance.time - (Conductor.instance.safe_zone_offset * 0.4)) {
 				PlayState.instance.onTileMiss(nextTile);
 			}
 		}
 	}
 
-	private function updateMovement(elapsed:Float) {
+	public function updateMovement(elapsed:Float) {
 		if (!started)
 			return;
 
@@ -227,17 +255,23 @@ class Player extends FlxSprite {
 		    case MOVING:
                 movePlayer(elapsed);
             case WAITING:
-                wait(elapsed);
+                wait();
         }
 	}
 
-    function wait(elapsed:Float)
+    public function loadMovement()
+    {
+        wait();
+        movePlayer(FlxG.elapsed);
+    }
+
+    function wait()
     {
         curTileDataIndex++;
         curState = MOVING;
     }
 
-    function movePlayer(elapsed:Float) {
+    public function movePlayer(elapsed:Float) {
         var nextTileData = null;
         if (curTileDataIndex + 1 >= 0)
             nextTileData = tileDatas[curTileDataIndex + 1];
@@ -255,7 +289,7 @@ class Player extends FlxSprite {
         }
     }
 
-    function conductorBasedMovement(elapsed:Float)
+    public function conductorBasedMovement(elapsed:Float)
     {
         var lastTileData = tileDatas[curTileDataIndex - 1];
         var curTileData = tileDatas[curTileDataIndex];
@@ -289,7 +323,7 @@ class Player extends FlxSprite {
         }
     }
 
-    function velocityBasedMovement(elapsed:Float)
+    public function velocityBasedMovement(elapsed:Float)
     {
         var addX:Float = 0;
         var addY:Float = 0;

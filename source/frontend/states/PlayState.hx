@@ -110,9 +110,11 @@ class PlayState extends StateBase
         holdRenderer = new HoldRenderer();
         add(holdRenderer);
 		loadSong();
+		add(player);
 		camFollow = new FlxObject(player.x, player.y - 100, 1, 1);
 		add(camFollow);
 		FlxG.camera.follow(camFollow, LOCKON);
+        player.loadMovement();
 		scripts.executeFunc("postCreate");
 		super.create();
 	}
@@ -229,12 +231,29 @@ class PlayState extends StateBase
 			var posY = tileData[1] * 50;
 
 			var _theme:MapTheme = linemap.theme;
-			var arrowTile = new ArrowTile(posX, posY, direction, curStep, _theme.tileColorData, tile.isSustainEnd, this);
+			var arrowTile = new ArrowTile(posX, posY, direction, curStep, _theme.tileColorData, tile.isSustain, tile.isSustainEnd, this);
 			tile_group.add(arrowTile);
-            player.tileDatas.push({x: posX, y: posY, step: curStep, instance: this, direction: direction, isSustainEnd: tile.isSustainEnd, colorData: _theme.tileColorData});
+            player.tileDatas.push({x: posX, y: posY, step: curStep, instance: this, direction: direction, isSustain: tile.isSustain, isSustainEnd: tile.isSustainEnd, colorData: _theme.tileColorData});
+            player.tileDatas.sort((a:TileData, b:TileData) -> {
+                var res:Int = 0;
+
+                if (a.step < b.step)
+                    res = -1
+                else if (a.step > b.step)
+                    res = 1;
+
+                return res;
+            });
             if (player.tileDatas[tileID-1] != null){
-                if (tile.isSustainEnd)
+                if (tile.isSustainEnd){
+                    var assumedLastTile:ArrowTile = ArrowTile.fromTileData(player.tileDatas[tileID-1]);
+                    tile_group.forEachAlive((t:ArrowTile) -> {
+                        if (t.step == assumedLastTile.step && t.direction == assumedLastTile.direction){
+                            t.nextTile = arrowTile;
+                        }
+                    });
                     holdRenderer.generateHold(arrowTile, ArrowTile.fromTileData(player.tileDatas[tileID-1]), arrowTile, false);
+                }
             }
 
 			current_direction = direction;
@@ -295,7 +314,7 @@ class PlayState extends StateBase
 			return obj;
 		}
 		// HUD Text Objects. //
-		scoreBoard = makeText(20, 20, "", 14, true, CENTER);
+		scoreBoard = makeText(20, 20, "", 14, true, LEFT);
 		add(scoreBoard);
 
 		lyricText = makeText(20, 20, "", 14, false, CENTER);
@@ -344,7 +363,7 @@ class PlayState extends StateBase
             }
             #end
 			FlxG.sound.music.play();
-			player.setPosition();
+			//player.setPosition();
 			player.started = true;
 		}
 
@@ -418,8 +437,7 @@ class PlayState extends StateBase
 		tile_group = new FlxTypedGroup<ArrowTile>();
 		add(tile_group);
 
-		player = new Player(0, 0);
-		add(player);
+        player = new Player(0, 0);
 
         playerTxt = new TextTileEffect(player.x, player.y - 100, 0, '');
         playerTxt.target = player;
@@ -468,6 +486,13 @@ class PlayState extends StateBase
         });
     }
 
+    public function onSustainHit()
+    {
+        scripts.executeFunc("onSustainHit", []);
+        // Code here
+        scripts.executeFunc("postSustainHit", []);
+    }
+    
 	public function onTileHit(tile:ArrowTile, ?ratingName:TileRating = PERFECT)
     {
         if (tile != null && tile.squareTileEffect != null){

@@ -1,5 +1,6 @@
 package backend.utils;
 
+import flixel.util.FlxTimer;
 import frontend.states.IntroState;
 import flixel.util.typeLimit.OneOfTwo;
 import backend.script.ScriptState;
@@ -126,6 +127,15 @@ class Common {
             FlxG.switchState(state);
         }
     }
+
+    /**
+     * A simple wait function.
+     * @param time How long to wait in seconds.
+     * @param func The function to run when the wait is complete.
+     * @return FlxTimer
+     */
+    public static function wait(time:Float, func:(_:FlxTimer) -> Void)
+        return new FlxTimer().start(time, func);
 
     /**
      * Get HH:MM:SS formatted time from miliseconds.

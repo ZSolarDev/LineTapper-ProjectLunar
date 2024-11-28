@@ -6,6 +6,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import backend.Conductor;
+import backend.utils.Common.wait;
 import frontend.objects.Player.Direction;
 
 /**
@@ -75,6 +76,12 @@ enum abstract TileRating(String) from String to String {
 
     public var isSustainEnd:Bool = false;
 
+    public var isSustain:Bool = false;
+
+    public var dying:Bool = false;
+
+    public var nextTile:ArrowTile;
+
 	/**
 	 * Creates a new ArrowTile object.
 	 * @param nX X Position
@@ -83,11 +90,12 @@ enum abstract TileRating(String) from String to String {
 	 * @param curStep This tile's Step time.
 	 * @param tileColorData Color Data for this ArrowTile.
 	 */
-	public function new(nX:Float, nY:Float, dir:Direction, curStep:Float, ?tileColorData:MapTileColorData, isSustainEnd:Bool, playstate:PlayState) {
+	public function new(nX:Float, nY:Float, dir:Direction, curStep:Float, ?tileColorData:MapTileColorData, isSustain:Bool, isSustainEnd:Bool, playstate:PlayState) {
 		super(nX, nY);
 		step = curStep;
 		direction = dir;
         antialiasing = true;
+        this.isSustain = isSustain;
         this.playstate = playstate;
         this.isSustainEnd = isSustainEnd;
 		if (tileColorData != null)
@@ -118,8 +126,25 @@ enum abstract TileRating(String) from String to String {
         this.playstate.add(squareTileEffect);
 	}
 
+    public static function indexOf(t:TileData, array:Array<TileData>):Int
+    {
+        var res = -1;
+        for (xID in 0...array.length)
+        {
+            var x = array[xID];
+            if (x.step == t.step && x.direction == t.direction){
+                res = xID;
+                break;
+            }
+        }
+        return res;
+    }
+
     public static function fromTileData(data:TileData):ArrowTile
-        return new ArrowTile(data.x, data.y, data.direction, data.step, data.colorData, data.isSustainEnd, data.instance);
+        return new ArrowTile(data.x, data.y, data.direction, data.step, data.colorData, data.isSustain, data.isSustainEnd, data.instance);
+
+    public static function toTileData(tile:ArrowTile):TileData
+        return {x: tile.x, y: tile.y, direction: tile.direction, step: tile.step, colorData: tile.tileColorData, isSustain: tile.isSustain, isSustainEnd: tile.isSustainEnd, instance: tile.playstate};
 
     public static function tileRatingToString(rating:TileRating):String
         return rating == 'perfect' ? 'Perfect!' : rating == 'cool' ? 'Cool!' : rating == 'meh' ? 'Meh.' : rating == 'miss' ? 'Missed!' : 'Perfect!';
@@ -138,8 +163,11 @@ enum abstract TileRating(String) from String to String {
     public function onTileHit(?rating:TileRating = PERFECT)
     {
         hit = true;
-        // Tween based on properties instead of a set value. Just a way to make sure custom things like modcharts won't break.
-        FlxTween.tween(this, {"scale.x": scale.x + scale.x/2.5, "scale.y": scale.y + scale.y/2.5, angle: angle + 70, alpha: 0}, 0.5, {ease: FlxEase.quadOut});
+        if (!isSustain){
+            // Tween based on properties instead of a set value. Just a way to make sure custom things like modcharts won't break.
+            dying = true;
+            FlxTween.tween(this, {"scale.x": scale.x + scale.x/2.5, "scale.y": scale.y + scale.y/2.5, angle: angle + 70}, 0.5, {ease: FlxEase.quadOut});
+        }
         FlxTween.tween(squareTileEffect, {"scale.x": scale.x + 1.7, "scale.y": scale.y + 1.7, alpha: 0}, 0.5, {ease: FlxEase.quadOut});
         new FlxTimer().start(0.5, function(t){
             playstate.remove(squareTileEffect);
@@ -147,13 +175,16 @@ enum abstract TileRating(String) from String to String {
                 squareTileEffect.kill();
             squareTileEffect = null;
         });
-        playstate.flickerTextOnPlayer(tileRatingToString(rating), FlxColor.CYAN, 0.35);
+        //playstate.flickerTextOnPlayer(tileRatingToString(rating), FlxColor.CYAN, 0.35);
     }
 
     public function onTileMiss()
     {
         missed = true;
-        FlxTween.tween(this, {"scale.x": scale.x - scale.x/2.5, "scale.y": scale.y - scale.y/2.5, angle: angle - 10, alpha: 0}, 0.5, {ease: FlxEase.quadIn});
+        if (!isSustain){
+            dying = true;
+            FlxTween.tween(this, {"scale.x": scale.x - scale.x/2.5, "scale.y": scale.y - scale.y/2.5, angle: angle - 10}, 0.5, {ease: FlxEase.quadIn});
+        } 
         FlxTween.tween(squareTileEffect, {"scale.x": scale.x - scale.x/2.5, "scale.y": scale.y - scale.y/2.5, angle: -10, alpha: 0}, 0.5, {ease: FlxEase.quadIn});
         new FlxTimer().start(0.5, function(t){
             playstate.remove(squareTileEffect);
@@ -166,11 +197,54 @@ enum abstract TileRating(String) from String to String {
 
 	override function update(elapsed:Float) {
         super.update(elapsed);
-
-		if (Conductor.instance.current_steps + 10 > step && Conductor.instance.current_steps < step && alpha < 1) {
-			alpha += 2 * elapsed;
-		}
+		calcAlpha(elapsed);
         if (canUpdateColors)
             updateColors();
 	}
+
+    var times:Int = 0;
+    var running = false;
+    function calcAlpha(elapsed:Float)
+    {
+        //reElection();
+        var val = 2 * elapsed;
+        if (Conductor.instance.current_steps + 10 > step && Conductor.instance.current_steps < step && alpha < 1) {
+            if (!dying){
+                if (!isSustainEnd)
+                    alpha += val;
+                
+                if (alpha == 1 && !running && isSustain){
+                    running = true;
+                    var stepDiff = nextTile.step - step;
+                    var waitTimeMS = stepDiff * Conductor.instance.step_ms;
+                    wait(waitTimeMS / (stepDiff * 100), (_) -> {
+                        dying = true;
+                    });
+                }
+            }
+		}
+        if (dying)
+            alpha -= val;
+    }
+
+    function reElection()
+    {
+        if (playstate.player.tileDatas[(ArrowTile.indexOf(ArrowTile.toTileData(this), playstate.player.tileDatas))+1] != null && isSustain){
+            while (nextTile == null){
+                var candidate = playstate.player.tileDatas[(ArrowTile.indexOf(ArrowTile.toTileData(this), playstate.player.tileDatas))+1];
+                playstate.tile_group.forEach((t:ArrowTile) -> {
+                    if (candidate != null){
+                        if (candidate.step == t.step && nextTile == null){
+                            times++;
+                            if (times != 1)
+                                trace('re-elected nextTile. ${times}X');
+                            else
+                                trace('re-elected nextTile.');
+                            nextTile = t;
+                        }
+                    }
+                });
+            }
+        }
+    }
 }
