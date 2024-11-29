@@ -22,7 +22,6 @@ typedef TileData = {
     var step:Float;
     var isSustain:Bool;
     var isSustainEnd:Bool;
-    var instance:PlayState;
     var direction:Direction;
     var colorData:MapTileColorData;
 }
@@ -36,6 +35,8 @@ class Player extends FlxSprite {
 	public static var BOX_SIZE:Int = 50;
 	public var direction:Direction = DOWN;
 	public var nextDirection:Direction = DOWN;
+
+    public var glowBG:FlxSprite;
 
     public var curState:PlayerMovementState = WAITING;
 
@@ -79,6 +80,12 @@ class Player extends FlxSprite {
         targetX = nX;
         targetY = nY;
 		makeGraphic(BOX_SIZE, BOX_SIZE, 0xFFFFFFFF);
+        glowBG = new FlxSprite(Assets.image('Gameplay', 'player-glow'));
+        glowBG.setGraphicSize(BOX_SIZE * 2, BOX_SIZE * 2);
+        glowBG.updateHitbox();
+        glowBG.setPosition(x + (width - glowBG.width) / 2, y + (height - glowBG.height) / 2);
+        glowBG.alpha = 0;
+        PlayState.instance.add(glowBG);
 	}
 
     var oldInterpPosition:Null<Bool> = null;
@@ -89,6 +96,12 @@ class Player extends FlxSprite {
 
 		handleTrails(elapsed);
 		updateScale(elapsed);
+        manageLerps();
+		super.update(elapsed);
+	}
+
+    function manageLerps()
+    {
         if (oldInterpPosition != null){
             if (interpPosition != oldInterpPosition)
             {
@@ -101,8 +114,10 @@ class Player extends FlxSprite {
             y = FlxMath.lerp(y, targetY, 0.2);
         }
         oldInterpPosition = interpPosition;
-		super.update(elapsed);
-	}
+
+        glowBG.setPosition(x + (width - glowBG.width) / 2, y + (height - glowBG.height) / 2);
+        glowBG.alpha = FlxMath.lerp(glowBG.alpha, 0, 0.1);
+    }
 
 	function updateProperties() {
 		if (Conductor.instance != null)
@@ -212,7 +227,7 @@ class Player extends FlxSprite {
                 if (Conductor.instance.current_steps > lastTile.step && Conductor.instance.current_steps < lastTile.step + (nextTile.step-lastTile.step))
                 {
                     if (pressArray[cast lastTile.direction] && !nextTile.hit) {
-			    		PlayState.instance.onSustainHit();
+			    		PlayState.instance.onSustainHit(nextTile);
 			    	}
                 }
             }

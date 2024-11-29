@@ -34,6 +34,7 @@ class PlayState extends StateBase
     public var mapStarted:Bool = false;
     public var mapEnded:Bool = false;
     public var misses:Int = 0;
+    public var score:Int = 0;
     public var hits:Int = 0;
     public var combo:Int = 0;
     public var ratings:Map<TileRating, Rating>;
@@ -231,9 +232,9 @@ class PlayState extends StateBase
 			var posY = tileData[1] * 50;
 
 			var _theme:MapTheme = linemap.theme;
-			var arrowTile = new ArrowTile(posX, posY, direction, curStep, _theme.tileColorData, tile.isSustain, tile.isSustainEnd, this);
+			var arrowTile = new ArrowTile(posX, posY, direction, curStep, _theme.tileColorData, tile.isSustain, tile.isSustainEnd);
 			tile_group.add(arrowTile);
-            player.tileDatas.push({x: posX, y: posY, step: curStep, instance: this, direction: direction, isSustain: tile.isSustain, isSustainEnd: tile.isSustainEnd, colorData: _theme.tileColorData});
+            player.tileDatas.push({x: posX, y: posY, step: curStep, direction: direction, isSustain: tile.isSustain, isSustainEnd: tile.isSustainEnd, colorData: _theme.tileColorData});
             player.tileDatas.sort((a:TileData, b:TileData) -> {
                 var res:Int = 0;
 
@@ -285,7 +286,12 @@ class PlayState extends StateBase
         if (!mapEnded){
 		    if (FlxG.sound.music != null && FlxG.sound.music.playing){
                 Conductor.instance.time = FlxG.sound.music.time;
-		    	scoreBoard.text = (using_autoplay ? "Autoplay Mode\n" + "Combo: " + combo + "x" : "" + hitStatus + "\nCombo: " + combo + "x");
+                var strBuf:StringBuf = new StringBuf();
+                if (using_autoplay) strBuf.add('Autoplay Mode\n');
+                strBuf.add(hitStatus);
+                strBuf.add('\nCombo: ${combo}X');
+                strBuf.add('\nScore: ${score}');
+                scoreBoard.text = strBuf.toString();
 		    } else {
 		    	scoreBoard.text = "[ PRESS SPACE TO START ]\nControls: WASD / Arrow Keys";
 		    }
@@ -468,6 +474,7 @@ class PlayState extends StateBase
             tile.onTileMiss();
             scoreBoard.scale.x -= 0.3;
             misses++;
+            score -= 100;
             combo = 0;
             var rating = ratings.get(MISS);
             rating.count++;
@@ -486,11 +493,22 @@ class PlayState extends StateBase
         });
     }
 
-    public function onSustainHit()
+    public function onSustainHit(tile:ArrowTile)
     {
         scripts.executeFunc("onSustainHit", []);
-        // Code here
+        score += 1;
+        scoreBoard.scale.x += 0.05;
+        player.glowBG.color = tile.color;
+        player.glowBG.alpha = 1;
         scripts.executeFunc("postSustainHit", []);
+    }
+
+    public function onSustainMiss(tile:ArrowTile)
+    {
+        scripts.executeFunc("onSustainMiss", []);
+        score -= 1;
+        scoreBoard.scale.x -= 0.05;
+        scripts.executeFunc("postSustainMiss", []);
     }
     
 	public function onTileHit(tile:ArrowTile, ?ratingName:TileRating = PERFECT)
@@ -504,6 +522,7 @@ class PlayState extends StateBase
                 updatePlayerPosition(tile);
             combo++;
             scoreBoard.scale.x += 0.3;
+            score += 100;
             FlxG.camera.zoom += 0.05;
             var rating = ratings.get(ratingName);
             rating.count++;

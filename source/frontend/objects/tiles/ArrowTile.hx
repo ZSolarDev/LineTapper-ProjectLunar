@@ -28,12 +28,11 @@ enum abstract TileRating(String) from String to String {
 }
 
 /**
- * Arrow Tile object, a component of the ArrowTile playstate.
+ * Arrow Tile object, a component of the ArrowTile PlayState.instance.
  */
  class ArrowTile extends FlxSprite {
     public var verticalTextOffset:Int = 15;
     public var squareTileEffect:SquareArrowTileEffect;
-    public var playstate:PlayState;
 	/**
 	 * Value for the tile color data.
 	 */
@@ -90,13 +89,12 @@ enum abstract TileRating(String) from String to String {
 	 * @param curStep This tile's Step time.
 	 * @param tileColorData Color Data for this ArrowTile.
 	 */
-	public function new(nX:Float, nY:Float, dir:Direction, curStep:Float, ?tileColorData:MapTileColorData, isSustain:Bool, isSustainEnd:Bool, playstate:PlayState) {
+	public function new(nX:Float, nY:Float, dir:Direction, curStep:Float, ?tileColorData:MapTileColorData, isSustain:Bool, isSustainEnd:Bool) {
 		super(nX, nY);
 		step = curStep;
 		direction = dir;
         antialiasing = true;
         this.isSustain = isSustain;
-        this.playstate = playstate;
         this.isSustainEnd = isSustainEnd;
 		if (tileColorData != null)
 			this.tileColorData = tileColorData;
@@ -123,7 +121,7 @@ enum abstract TileRating(String) from String to String {
 		alpha = 0;
 
         squareTileEffect = new SquareArrowTileEffect(nX, nY, this, 5);
-        this.playstate.add(squareTileEffect);
+        PlayState.instance.add(squareTileEffect);
 	}
 
     public static function indexOf(t:TileData, array:Array<TileData>):Int
@@ -141,23 +139,27 @@ enum abstract TileRating(String) from String to String {
     }
 
     public static function fromTileData(data:TileData):ArrowTile
-        return new ArrowTile(data.x, data.y, data.direction, data.step, data.colorData, data.isSustain, data.isSustainEnd, data.instance);
+        return new ArrowTile(data.x, data.y, data.direction, data.step, data.colorData, data.isSustain, data.isSustainEnd);
 
     public static function toTileData(tile:ArrowTile):TileData
-        return {x: tile.x, y: tile.y, direction: tile.direction, step: tile.step, colorData: tile.tileColorData, isSustain: tile.isSustain, isSustainEnd: tile.isSustainEnd, instance: tile.playstate};
+        return {x: tile.x, y: tile.y, direction: tile.direction, step: tile.step, colorData: tile.tileColorData, isSustain: tile.isSustain, isSustainEnd: tile.isSustainEnd};
 
     public static function tileRatingToString(rating:TileRating):String
         return rating == 'perfect' ? 'Perfect!' : rating == 'cool' ? 'Cool!' : rating == 'meh' ? 'Meh.' : rating == 'miss' ? 'Missed!' : 'Perfect!';
 
     function updateColors()
     {
-        color = switch (step % 4) {
-			case 0: FlxColor.fromRGB(tileColorData.zero.red, tileColorData.zero.green, tileColorData.zero.blue, 255);
-			case 1: FlxColor.fromRGB(tileColorData.one.red, tileColorData.one.green, tileColorData.one.blue, 255);
-			case 2: FlxColor.fromRGB(tileColorData.two.red, tileColorData.two.green, tileColorData.two.blue, 255);
-			case 3: FlxColor.fromRGB(tileColorData.three.red, tileColorData.three.green, tileColorData.three.blue, 255);
-			default: FlxColor.fromRGB(tileColorData.fallback.red, tileColorData.fallback.green, tileColorData.fallback.blue, 255);
-		}
+        if (isSustain && nextTile != null)
+            color = nextTile.color;
+        else{
+            color = switch (step % 4) {
+		    	case 0: FlxColor.fromRGB(tileColorData.zero.red, tileColorData.zero.green, tileColorData.zero.blue, 255);
+		    	case 1: FlxColor.fromRGB(tileColorData.one.red, tileColorData.one.green, tileColorData.one.blue, 255);
+		    	case 2: FlxColor.fromRGB(tileColorData.two.red, tileColorData.two.green, tileColorData.two.blue, 255);
+		    	case 3: FlxColor.fromRGB(tileColorData.three.red, tileColorData.three.green, tileColorData.three.blue, 255);
+		    	default: FlxColor.fromRGB(tileColorData.fallback.red, tileColorData.fallback.green, tileColorData.fallback.blue, 255);
+		    }
+        }
     }
 
     public function onTileHit(?rating:TileRating = PERFECT)
@@ -170,12 +172,12 @@ enum abstract TileRating(String) from String to String {
         }
         FlxTween.tween(squareTileEffect, {"scale.x": scale.x + 1.7, "scale.y": scale.y + 1.7, alpha: 0}, 0.5, {ease: FlxEase.quadOut});
         new FlxTimer().start(0.5, function(t){
-            playstate.remove(squareTileEffect);
+            PlayState.instance.remove(squareTileEffect);
             if (squareTileEffect != null)
                 squareTileEffect.kill();
             squareTileEffect = null;
         });
-        //playstate.flickerTextOnPlayer(tileRatingToString(rating), FlxColor.CYAN, 0.35);
+        //PlayState.instance.flickerTextOnPlayer(tileRatingToString(rating), FlxColor.CYAN, 0.35);
     }
 
     public function onTileMiss()
@@ -187,12 +189,12 @@ enum abstract TileRating(String) from String to String {
         } 
         FlxTween.tween(squareTileEffect, {"scale.x": scale.x - scale.x/2.5, "scale.y": scale.y - scale.y/2.5, angle: -10, alpha: 0}, 0.5, {ease: FlxEase.quadIn});
         new FlxTimer().start(0.5, function(t){
-            playstate.remove(squareTileEffect);
+            PlayState.instance.remove(squareTileEffect);
             if (squareTileEffect != null)
                 squareTileEffect.kill();
             squareTileEffect = null;
         });
-        playstate.flickerTextOnPlayer(tileRatingToString(MISS), 0xFFAA0000, 0.35);
+        PlayState.instance.flickerTextOnPlayer(tileRatingToString(MISS), 0xFFAA0000, 0.35);
     }
 
 	override function update(elapsed:Float) {
@@ -229,10 +231,10 @@ enum abstract TileRating(String) from String to String {
 
     function reElection()
     {
-        if (playstate.player.tileDatas[(ArrowTile.indexOf(ArrowTile.toTileData(this), playstate.player.tileDatas))+1] != null && isSustain){
+        if (PlayState.instance.player.tileDatas[(ArrowTile.indexOf(ArrowTile.toTileData(this), PlayState.instance.player.tileDatas))+1] != null && isSustain){
             while (nextTile == null){
-                var candidate = playstate.player.tileDatas[(ArrowTile.indexOf(ArrowTile.toTileData(this), playstate.player.tileDatas))+1];
-                playstate.tile_group.forEach((t:ArrowTile) -> {
+                var candidate = PlayState.instance.player.tileDatas[(ArrowTile.indexOf(ArrowTile.toTileData(this), PlayState.instance.player.tileDatas))+1];
+                PlayState.instance.tile_group.forEach((t:ArrowTile) -> {
                     if (candidate != null){
                         if (candidate.step == t.step && nextTile == null){
                             times++;

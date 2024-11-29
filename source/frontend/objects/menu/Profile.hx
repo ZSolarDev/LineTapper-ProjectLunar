@@ -30,6 +30,7 @@ class Profile extends FlxSprite {
     var _txt_displayName:FlxText;
     var _txt_indicator:FlxText;
     var _parent_effect:FlxSkewedSprite;
+    var _bg:FlxSkewedSprite;
     var _effect_grp:Array<Dynamic> = [];
 
     var ready:Bool = false;
@@ -44,7 +45,7 @@ class Profile extends FlxSprite {
         FlxSpriteUtil.drawCircle(circ,-1,-1,-1,FlxColor.BLACK);
         FlxSpriteUtil.alphaMask(this,temp.pixels,circ.pixels);
 
-        setGraphicSize(size.width,size.height);
+        setGraphicSize(size.width - 10, size.height - 10); // Subtract 10 to add some padding.
         updateHitbox();
 
         _txt_displayName = new FlxText(0,0,-1,Common.PLAYER.display,30);
@@ -52,9 +53,13 @@ class Profile extends FlxSprite {
         _txt_indicator = new FlxText(0,0,-1,"OFFLINE",30);
         _txt_indicator.setFormat(Assets.font("extenro-bold"), 8, FlxColor.GRAY);
         _parent_effect = new FlxSkewedSprite();
-        _parent_effect = cast _parent_effect.makeGraphic(15,size.height);
+        _parent_effect = cast _parent_effect.makeGraphic(15, size.height);
         _parent_effect.antialiasing = true;
         _parent_effect.skew.x = -30;
+        _bg = new FlxSkewedSprite(0, y - 5);
+        _bg = cast _bg.makeGraphic(cast nWidth, size.height, FlxColor.BLACK);
+        _bg.antialiasing = true;
+        _bg.skew.x = -30;
 
         ready = true;
     }
@@ -76,16 +81,21 @@ class Profile extends FlxSprite {
     }
 
     override function draw() {
-        super.draw();
         if (!ready) return;
-        _txt_displayName.setPosition(x+width+10,y+5);
+        _bg.x = x - 35;
+        _bg.y = y - 5;
+        _bg.draw();
+
+        super.draw();
+
+        _txt_displayName.setPosition(x+width+10,y);
         _txt_displayName.draw();
 
-        _txt_indicator.setPosition(x+width+10,_txt_displayName.y+_txt_displayName.height+5);
+        _txt_indicator.setPosition(x+width+10,_txt_displayName.y+_txt_displayName.height);
         _txt_indicator.draw();
 
         _parent_effect.x = (x + (nWidth-50) + 10);
-        _parent_effect.y = y;
+        _parent_effect.y = y - 5;
         _parent_effect.draw();
 
         for (i in _effect_grp) {

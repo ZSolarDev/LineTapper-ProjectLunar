@@ -82,9 +82,8 @@ class MenuState extends StateBase {
         if(fromIntro){
         new FlxTimer().start(1.5, function(t){
             FlxG.camera.flash(0x42FFFFFF, 1);
-            FlxG.camera.angle = 15;
             FlxG.camera.zoom += 0.05;
-            FlxTween.tween(FlxG.camera, {angle: 0, zoom: 1}, 1, {ease: FlxEase.quadOut});
+            FlxTween.tween(FlxG.camera, {zoom: 1}, 1, {ease: FlxEase.quadOut});
             FlxFlicker.flicker(logo, 0.5, 0.02, true);
         });
         }else{
