@@ -1,6 +1,6 @@
 package backend.script;
 
-import frontend.states.PlayState;
+import frontend.states.playstate.PlayState;
 import flixel.FlxBasic;
 import hscript.Interp;
 

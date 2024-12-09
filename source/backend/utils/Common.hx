@@ -114,7 +114,7 @@ class Common {
                     }else
                         trace('The script ($hxPath) was not a valid HScript extension, failed to switch states.');
                 }else
-                    targetSectionOrState == 'Main Menu' ? FlxG.switchState(new frontend.states.MenuState(cast arg)) : targetSectionOrState == 'Gameplay' ? FlxG.switchState(new frontend.states.PlayState()) : FlxG.switchState(new frontend.states.IntroState());
+                    targetSectionOrState == 'Main Menu' ? FlxG.switchState(new frontend.states.MenuState(cast arg)) : targetSectionOrState == 'Gameplay' ? FlxG.switchState(new frontend.states.playstate.PlayState()) : FlxG.switchState(new frontend.states.IntroState());
             }else
                 trace('Section $targetSectionOrState does not exist, failed to switch states.');
         }else{

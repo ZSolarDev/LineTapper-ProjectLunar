@@ -1,7 +1,7 @@
 package frontend.objects.tiles;
 
 import frontend.objects.Player.TileData;
-import frontend.states.PlayState;
+import frontend.states.playstate.PlayState;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;

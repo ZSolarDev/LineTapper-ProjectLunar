@@ -178,7 +178,7 @@ class IntroState extends StateBase {
             switchState(new frontend.states.debug.MenuDebugState());
         }
         lerpProg = FlxMath.lerp(curLoadingStage, lerpProg, 0.9);
-        if (lerpProg >= curLoadingStage - 1 + 0.9)
+        if (lerpProg >= curLoadingStage - 0.1)
             lerpProg = curLoadingStage;
         super.update(elapsed);
     }

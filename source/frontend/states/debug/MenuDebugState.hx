@@ -62,7 +62,7 @@ class MenuDebugState extends StateBase {
         if (FlxG.keys.justPressed.ENTER) {
             if (song.length > 0){
                 if (FileSystem.exists('maps/$song')){
-                    FlxG.switchState(new PlayState(song.trim().toLowerCase()));
+                    FlxG.switchState(new frontend.states.playstate.PlayState(song.trim().toLowerCase()));
                     FlxG.sound.play(Assets.sound('Global Assets', 'key-press'));
                 }else{
                     FlxFlicker.flicker(inputText, 1, 0.02, true);

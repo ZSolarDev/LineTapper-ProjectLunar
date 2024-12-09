@@ -1,6 +1,6 @@
 package backend.script;
 
-import frontend.states.PlayState;
+import frontend.states.playstate.PlayState;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxTimer;

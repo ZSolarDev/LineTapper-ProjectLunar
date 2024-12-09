@@ -1,5 +1,10 @@
-package frontend.states;
+package frontend.states.playstate;
 
+import frontend.states.playstate.GameComponent;
+import frontend.states.playstate.InitializationComponent;
+import frontend.states.playstate.HudComponent;
+import frontend.states.playstate.SongComponent;
+import frontend.states.playstate.SongComponent.Rating;
 import frontend.objects.tiles.holds.HoldRenderer;
 import frontend.objects.tiles.TextTileEffect;
 import flixel.ui.FlxBar;
@@ -19,10 +24,10 @@ import backend.MapData;
 import frontend.objects.tiles.ArrowTile;
 import frontend.objects.Player;
 
-typedef Rating = {
-    var count:Int;
-    var arrowTiles:Array<ArrowTile>;
-}
+//typedef Rating = {
+//    var count:Int;
+//    var arrowTiles:Array<ArrowTile>;
+//}
 
 class PlayState extends StateBase
 {

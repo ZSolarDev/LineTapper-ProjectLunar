@@ -7,7 +7,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
 import backend.Conductor;
-import frontend.states.PlayState;
+import frontend.states.playstate.PlayState;
 
 enum abstract Direction(Int) {
 	var LEFT = 0;
